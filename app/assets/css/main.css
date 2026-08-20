@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Etheric Soft UI — mockup DESIGN.md */
+  --surface: #f9f9ff;
+  --surface-base: #e7ecf2;          /* base page background */
+  --surface-card: #f9f9ff;
+  --surface-container: #e7eeff;
+  --on-surface: #111c2c;
+  --on-surface-variant: #424752;
+  --primary: #005bb2;
+  --primary-strong: #3a7bd5;
+  --outline-variant: #c2c6d4;
+  --radius-card: 24px;
+  --radius-btn: 18px;
+
+  /* Elevasi neumorphic (dual-source light) */
+  --shadow-raised: -10px -10px 20px #ffffff, 10px 10px 20px #bfc9d4;
+  --shadow-pressed: inset -5px -5px 10px #ffffff, inset 5px 5px 10px #bfc9d4;
+  --shadow-accent: -5px -5px 15px rgba(255, 255, 255, 0.2), 5px 5px 15px rgba(0, 70, 140, 0.4);
+  --shadow-island: -6px -6px 16px rgba(255, 255, 255, 0.9), 6px 6px 16px rgba(191, 201, 212, 0.7);
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--surface-base);
+  color: var(--on-surface);
+  overscroll-behavior: none;
+}
+
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+@layer components {
+  /* utilitas neumorphic */
+  .neu-raised {
+    background: var(--surface-card);
+    box-shadow: var(--shadow-raised);
+  }
+  .neu-pressed {
+    background: var(--surface-card);
+    box-shadow: var(--shadow-pressed);
+  }
+  .neu-accent {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: var(--shadow-accent);
+  }
+  .neu-island {
+    box-shadow: var(--shadow-island);
+  }
+
+  .ai-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .ai-link:hover {
+    color: var(--primary-strong);
+  }
+
+  .label-caps {
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .display-lg {
+    font-size: clamp(30px, 4.5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .headline-lg {
+    font-size: clamp(21px, 3vw, 30px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .title-md {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .body-lg {
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  .body-md {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  .container-portfolio {
+    @apply mx-auto w-full max-w-7xl px-5 md:px-8;
+  }
+
+  .section-spacing {
+    @apply py-12 md:py-16;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

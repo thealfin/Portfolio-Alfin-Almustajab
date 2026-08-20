@@ -1,0 +1,90 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  compatibilityDate: '2026-08-15',
+  devtools: { enabled: true },
+
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@nuxtjs/google-fonts',
+    '@nuxtjs/color-mode',
+    '@nuxt/image',
+    '@pinia/nuxt',
+    '@vueuse/nuxt',
+    '@nuxt/icon',
+    '@nuxtjs/i18n',
+    '@nuxtjs/sitemap',
+    '@nuxtjs/robots',
+    'motion-v/nuxt',
+  ],
+
+  icon: {
+    clientBundle: {
+      scan: true,
+    },
+  },
+
+  css: ['~/assets/css/main.css'],
+
+  components: [
+    { path: '~/components', pathPrefix: false },
+  ],
+
+  googleFonts: {
+    families: { Inter: [400, 500, 600, 700, 800] },
+    display: 'swap',
+  },
+
+  colorMode: {
+    classSuffix: '',
+    preference: 'light',
+  },
+
+  i18n: {
+    locales: [
+      { code: 'id', name: 'Indonesia', file: 'id.json' },
+      { code: 'en', name: 'English', file: 'en.json' },
+    ],
+    defaultLocale: 'id',
+    strategy: 'no_prefix',
+    detectBrowserLanguage: false,
+    langDir: '../i18n/',
+    experimental: {
+      preload: true,
+    },
+  },
+
+  routeRules: {
+    '/': { isr: false },
+    '/admin/**': { ssr: false },
+    '/api/chat': { cors: true },
+  },
+
+  runtimeConfig: {
+    supabaseUrl: process.env.SUPABASE_URL || 'https://wrwgmmapexljecjnxirk.supabase.co',
+    supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    geminiApiKey: process.env.GEMINI_API_KEY || '',
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL || 'https://wrwgmmapexljecjnxirk.supabase.co',
+      supabaseKey: process.env.SUPABASE_KEY || '',
+    },
+  },
+
+  site: {
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://portfolio-alfin-six.vercel.app',
+  },
+
+  app: {
+    head: {
+      htmlAttrs: { lang: 'id' },
+      titleTemplate: '%s — Alfin Almustajab',
+      meta: [
+        { name: 'description', content: 'Portofolio Alfin Almustajab — Front-End Developer & IT Support.' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      ],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/webp', href: '/favicon.webp' },
+      ],
+    },
+  },
+})
