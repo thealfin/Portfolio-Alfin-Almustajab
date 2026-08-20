@@ -65,9 +65,9 @@ const forgotPassword = async () => {
     <div class="w-full max-w-[480px] bg-surface-card rounded-[24px] p-[48px] neu-raised flex flex-col gap-6">
       <div class="flex flex-col items-center gap-6">
         <span
-          class="w-16 h-16 rounded-full bg-surface-card neu-raised flex items-center justify-center text-primary font-extrabold text-2xl tracking-tighter"
+          class="w-16 h-16 rounded-full bg-surface-card neu-raised flex items-center justify-center overflow-hidden p-2"
         >
-          AA
+          <img src="/logo.webp" alt="Alfin Almustajab" class="w-full h-full object-contain" />
         </span>
         <div class="text-center flex flex-col gap-2">
           <h1 class="headline-lg text-on-surface">Admin Login</h1>

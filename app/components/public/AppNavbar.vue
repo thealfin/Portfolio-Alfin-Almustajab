@@ -67,10 +67,10 @@ const toggleLocale = () => {
     >
       <button class="flex items-center gap-4" aria-label="Beranda" @click="go({ id: 'home', label: '' })">
         <span
-          class="rounded-full neu-raised flex items-center justify-center font-bold tracking-tighter text-primary transition-all duration-300"
-          :class="isScrolled ? 'w-8 h-8 text-xs' : 'w-10 h-10'"
+          class="rounded-full neu-raised flex items-center justify-center overflow-hidden transition-all duration-300"
+          :class="isScrolled ? 'w-8 h-8 p-1' : 'w-10 h-10 p-1.5'"
         >
-          AA
+          <img src="/logo.webp" alt="Alfin Almustajab" class="w-full h-full object-contain" />
         </span>
       </button>
 

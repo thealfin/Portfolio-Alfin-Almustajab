@@ -24,10 +24,6 @@ GSAP + Lenis + Motion animations.
 
 > Screenshots diambil langsung dari aplikasi yang berjalan (desktop & mobile).
 
-<p align="center">
-  <img src="docs/screenshots/home-full.png" alt="Homepage full page" width="100%" />
-</p>
-
 ### Homepage Sections
 
 | | | |
@@ -212,9 +208,9 @@ node scripts/screenshots.mjs
 
 **Alfin Almustajab** — Front-End Developer & IT Support
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com)
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com)
-[![Email](https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:you@example.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/alfin-almustajab-630501374/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/)
+[![Email](https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:kangalfin95@gmail.com)
 
 ---
 

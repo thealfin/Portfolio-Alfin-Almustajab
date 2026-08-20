@@ -34,8 +34,8 @@ const logout = async () => {
         to="/admin/dashboard"
         class="neu-raised rounded-[18px] p-3 lg:px-4 lg:py-4 flex items-center gap-3 hover:scale-[1.01] transition-transform"
       >
-        <span class="w-9 h-9 rounded-full neu-accent flex items-center justify-center font-extrabold tracking-tighter text-sm">
-          AA
+        <span class="w-9 h-9 rounded-full neu-accent flex items-center justify-center overflow-hidden p-1 shrink-0">
+          <img src="/logo.webp" alt="Alfin Almustajab" class="w-full h-full object-contain" />
         </span>
         <span class="hidden lg:flex flex-col">
           <span class="title-md text-on-surface leading-none">Admin Panel</span>
