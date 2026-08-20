@@ -10,6 +10,19 @@ const { pick } = useLocale()
 const active = ref(0)
 const items = computed(() => props.testimonials ?? [])
 
+const broken = ref<Set<string>>(new Set())
+const onImgError = (name: string) => {
+  broken.value = new Set(broken.value).add(name)
+}
+
+const starIcon = (rating: number, i: number) => {
+  if (rating >= i) return 'ph:star-fill'
+  if (rating >= i - 0.5) return 'ph:star-half-fill'
+  return 'ph:star'
+}
+
+const ratingLabel = (rating: number) => (rating % 1 === 0 ? rating.toFixed(0) : rating.toFixed(1))
+
 watch(active, () => {})
 </script>
 
@@ -34,9 +47,32 @@ watch(active, () => {})
             <p class="headline-lg text-on-surface leading-relaxed">
               “{{ pick(items[active], 'quote') }}”
             </p>
-            <div>
-              <p class="title-md text-on-surface">{{ items[active].author_name }}</p>
-              <p class="body-md text-primary font-semibold">{{ items[active].author_role }} · {{ items[active].author_company }}</p>
+
+            <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+              <div class="flex items-center gap-4">
+                <span class="w-14 h-14 rounded-full neu-raised flex items-center justify-center overflow-hidden shrink-0">
+                  <img
+                    v-if="items[active].avatar_url && !broken.has(items[active].id)"
+                    :src="items[active].avatar_url"
+                    :alt="items[active].author_name"
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                    @error="onImgError(items[active].id)"
+                  />
+                  <span v-else class="title-md font-extrabold text-primary">{{ items[active].author_name?.charAt(0) }}</span>
+                </span>
+                <div class="flex flex-col gap-1">
+                  <p class="title-md text-on-surface">{{ items[active].author_name }}</p>
+                  <p class="body-md text-primary font-semibold">{{ items[active].author_role }} · {{ items[active].author_company }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 md:ml-auto">
+                <div class="flex items-center gap-0.5">
+                  <Icon v-for="i in 5" :key="i" :name="starIcon(items[active].rating, i)" class="text-lg text-primary" />
+                </div>
+                <span class="label-caps text-on-surface-variant font-bold">{{ ratingLabel(items[active].rating) }} / 5</span>
+              </div>
             </div>
           </div>
         </Transition>

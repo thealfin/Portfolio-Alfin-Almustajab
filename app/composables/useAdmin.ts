@@ -38,6 +38,10 @@ export function useAdmin() {
   const createStack = (s: any) => call('post', '/admin/stacks', s)
   const updateStack = (id: string, s: any) => call('patch', `/admin/stacks/${id}`, s)
   const deleteStack = (id: string) => call('delete', `/admin/stacks/${id}`)
+  const listTestimonials = () => call('get', '/admin/testimonials')
+  const createTestimonial = (t: any) => call('post', '/admin/testimonials', t)
+  const updateTestimonial = (id: string, t: any) => call('patch', `/admin/testimonials/${id}`, t)
+  const deleteTestimonial = (id: string) => call('delete', `/admin/testimonials/${id}`)
 
-  return { call, stats, activity, analytics, listProjects, createProject, updateProject, deleteProject, chatLogs, listKnowledge, createKnowledge, updateKnowledge, deleteKnowledge, getAiSettings, updateAiSettings, listMessages, updateMessage, deleteMessage, archiveChatLog, getSecurity, changePassword, listThoughts, createThought, updateThought, deleteThought, listStacks, createStack, updateStack, deleteStack }
+  return { call, stats, activity, analytics, listProjects, createProject, updateProject, deleteProject, chatLogs, listKnowledge, createKnowledge, updateKnowledge, deleteKnowledge, getAiSettings, updateAiSettings, listMessages, updateMessage, deleteMessage, archiveChatLog, getSecurity, changePassword, listThoughts, createThought, updateThought, deleteThought, listStacks, createStack, updateStack, deleteStack, listTestimonials, createTestimonial, updateTestimonial, deleteTestimonial }
 }

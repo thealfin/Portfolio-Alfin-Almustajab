@@ -11,6 +11,7 @@ const items = computed(() => [
   { label: t('admin.portfolio'), to: '/admin/projects', icon: 'ph:squares-four-bold' },
   { label: t('admin.thoughtsMenu'), to: '/admin/thoughts', icon: 'ph:notebook-bold' },
   { label: t('admin.stacksMenu'), to: '/admin/stacks', icon: 'ph:stack-bold' },
+  { label: t('admin.testimonialsMenu'), to: '/admin/testimonials', icon: 'ph:star-bold' },
   { label: t('admin.chatLogs'), to: '/admin/chat-logs', icon: 'ph:chat-circle-bold' },
   { label: t('admin.messagesMenu'), to: '/admin/messages', icon: 'ph:envelope-bold' },
   { label: t('admin.knowledge'), to: '/admin/knowledge', icon: 'ph:book-open-bold' },
