@@ -218,4 +218,4 @@ node scripts/screenshots.mjs
 
 ---
 
-Built with ❤️ using [Nuxt 4](https://nuxt.com), [Supabase](https://supabase.com) and [Google Gemini](https://ai.google.dev).
+Built with [Nuxt 4](https://nuxt.com), [Supabase](https://supabase.com) and [Google Gemini](https://ai.google.dev).
