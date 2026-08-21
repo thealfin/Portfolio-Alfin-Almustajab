@@ -119,7 +119,7 @@
   },
   "footer": {
     "available": "Open for collaboration",
-    "copyright": "ALFIN ALMUSTAJAB. CRAFTED WITH DEPTH."
+    "copyright": "ALFIN ALMUSTAJAB © {year}. All rights reserved."
   },
   "ai": {
     "title": "Alfin's AI Assistant",

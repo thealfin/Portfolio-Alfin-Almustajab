@@ -119,7 +119,7 @@
   },
   "footer": {
     "available": "Terbuka untuk kolaborasi",
-    "copyright": "ALFIN ALMUSTAJAB. DIBUAT DENGAN KEDALAMAN."
+    "copyright": "ALFIN ALMUSTAJAB © {year}. All rights reserved."
   },
   "ai": {
     "title": "Alfin's AI Assistant",
