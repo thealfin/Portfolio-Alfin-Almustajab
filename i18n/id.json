@@ -38,9 +38,9 @@
     "kicker": "Tentang Saya",
     "headingBold": "Engineer",
     "headingItalic": "di balik karya.",
-    "tags": "FRONT-END DEVELOPER • NUXT SPECIALIST • AI INTEGRATOR",
-    "p1": "Saya Alfin Almustajab, seorang Front-End Developer yang berbasis di Indonesia. Saya berfokus membangun antarmuka web modern dan responsif menggunakan Nuxt.js, mengelola dan menghubungkan data secara efisien via Supabase, serta memperkayanya dengan integrasi AI untuk menciptakan produk digital yang bermanfaat.",
-    "p2": "Saya sangat antusias dalam menciptakan aplikasi yang tidak hanya berfungsi dengan baik, tetapi juga memiliki pengalaman UI/UX yang nyaman dan intuitif bagi pengguna. Saat ini, saya terus mengeksplorasi teknologi web terbaru untuk menghadirkan solusi yang inovatif.",
+    "tags": "FULL-STACK • UI UX DESIGNER • IT SUPPORT • DIGITAL MARKETING • AI ENTHUSIAST • WEB BUILDER • COPYWRITER",
+    "p1": "Saya Alfin Almustajab, seorang multi-disciplinary digital creator yang memadukan keahlian Full-Stack engineering, UI/UX Designer, dan Web Builder berbasis di Indonesia. Saya berfokus merancang antarmuka modern yang estetik, membangun arsitektur web yang scalable, serta mengeksplorasi integrasi kecerdasan buatan sebagai seorang AI Enthusiast untuk menghadirkan solusi digital masa depan.",
+    "p2": "Dengan fondasi teknis yang kuat di bidang IT Support untuk menjaga keandalan sistem, dipadukan keahlian strategis dalam Digital Marketing dan Copywriter untuk merangkai pesan yang memikat, saya menghadirkan ekosistem digital yang komprehensif mulai dari baris kode backend, keindahan visual, hingga strategi pertumbuhan produk yang berdampak nyata.",
     "greeting": "Salam hangat,",
     "signatureAlt": "Tanda tangan Alfin"
   },
@@ -61,7 +61,7 @@
   },
   "projects": {
     "title": "Semua Proyek",
-    "subtitle": "Kumpulan karya digital saya — dari antarmuka admin yang kompleks hingga pengalaman pengguna yang menarik.",
+    "subtitle": "Kumpulan karya digital saya dari antarmuka admin yang kompleks hingga pengalaman pengguna yang menarik.",
     "all": "Semua",
     "adminPanel": "Admin Panel",
     "ecommerce": "E-Commerce",
@@ -138,7 +138,8 @@
     "sessionEndedHint": "Sesi obrolan telah ditutup. Silahkan Hubungi Alfin langsung untuk pertanyaan lebih lanjut.",
     "refreshHint": "Muat ulang browser untuk mereset limit chat",
     "newSession": "Mulai Sesi Baru",
-    "creditHint": "Sisa kuota pertanyaan dalam sesi ini"
+    "creditHint": "Sisa kuota pertanyaan dalam sesi ini",
+    "thinking": "Sedang berpikir..."
   },
 "admin": {
     "dashboard": "Dashboard",
@@ -398,5 +399,16 @@
     "anSectionSubtitle": "Ringkasan kunjungan & detail pengunjung terbaru",
     "anViewFull": "Lihat Semua Analitik",
     "anRecentVisitors": "Pengunjung Terbaru"
+  },
+  "github": {
+    "kicker": "KONTRIBUSI OPEN SOURCE",
+    "title": "Aktivitas GitHub",
+    "totalInYear": "kontribusi dalam 1 tahun terakhir",
+    "activeStatus": "Kontributor Aktif",
+    "streak": "Streak Saat Ini",
+    "longestStreak": "Streak Terpanjang",
+    "bestDay": "Hari Terproduktif",
+    "less": "Sedikit",
+    "more": "Banyak"
   }
 }

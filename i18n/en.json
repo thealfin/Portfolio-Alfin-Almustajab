@@ -38,9 +38,9 @@
     "kicker": "About Me",
     "headingBold": "Engineer",
     "headingItalic": "behind the work.",
-    "tags": "FRONT-END DEVELOPER • NUXT SPECIALIST • AI INTEGRATOR",
-    "p1": "I'm Alfin Almustajab, a Front-End Developer based in Indonesia. I focus on building modern, responsive web interfaces with Nuxt.js, managing and connecting data efficiently via Supabase, and enriching it all with AI integrations to create meaningful digital products.",
-    "p2": "I'm passionate about crafting applications that not only work well but also deliver a comfortable, intuitive UI/UX experience for users. Right now, I keep exploring the latest web technologies to bring innovative solutions to life.",
+    "tags": "FULL-STACK • UI UX DESIGNER • IT SUPPORT • DIGITAL MARKETING • AI ENTHUSIAST • WEB BUILDER • COPYWRITER",
+    "p1": "I'm Alfin Almustajab, a multidisciplinary digital creator merging Full-Stack engineering, UI/UX Design, and modern Web Building based in Indonesia. I specialize in architecting scalable web applications, crafting intuitive human-centric interfaces, and leveraging cutting-edge intelligence as an active AI Enthusiast.",
+    "p2": "Backed by solid technical expertise in IT Support ensuring robust infrastructure, complemented by strategic insights in Digital Marketing and impactful Copywriting, I deliver comprehensive digital solutions from resilient backend code to high-converting user experiences.",
     "greeting": "Warm regards,",
     "signatureAlt": "Alfin's signature"
   },
@@ -138,7 +138,8 @@
     "sessionEndedHint": "The chat session has been closed. Please contact Alfin directly for further questions.",
     "refreshHint": "Refresh the browser to reset the chat limit",
     "newSession": "Start New Session",
-    "creditHint": "Remaining question quota for this session"
+    "creditHint": "Remaining question quota for this session",
+    "thinking": "Thinking..."
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -398,5 +399,16 @@
     "anSectionSubtitle": "Visit summary & latest visitor details",
     "anViewFull": "View Full Analytics",
     "anRecentVisitors": "Recent Visitors"
+  },
+  "github": {
+    "kicker": "OPEN SOURCE CONTRIBUTIONS",
+    "title": "GitHub Activity",
+    "totalInYear": "contributions in the last year",
+    "activeStatus": "Active Contributor",
+    "streak": "Current Streak",
+    "longestStreak": "Longest Streak",
+    "bestDay": "Best Day",
+    "less": "Less",
+    "more": "More"
   }
 }

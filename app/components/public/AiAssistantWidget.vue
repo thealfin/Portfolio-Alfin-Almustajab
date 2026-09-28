@@ -6,6 +6,8 @@ import { useAiWidget } from '~/composables/useAiWidget'
 import { useApi } from '~/composables/useApi'
 import { useAiUserId } from '~/composables/useAiUserId'
 import { renderChatMessage } from '~/composables/renderChatMessage'
+import BotAvatar from './ui/BotAvatar.vue'
+import ThinkingOrb from './ui/ThinkingOrb.vue'
 
 const { t } = useI18n()
 const { open, closeChat } = useAiWidget()
@@ -68,11 +70,19 @@ const quickQuestions = computed(() => [
 const hasConversation = computed(() => messages.value.length > 0)
 
 watch(open, (val) => {
-  document.body.style.overflow = val ? 'hidden' : ''
-  if (val) {
-    nextTick(() => inputRef.value?.focus())
+  if (typeof document !== 'undefined') {
+    if (val) {
+      document.body.style.overflow = 'hidden'
+      nextTick(() => inputRef.value?.focus())
+    }
   }
 })
+
+const onModalAfterLeave = () => {
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+}
 
 const onKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && open.value) closeChat()
@@ -83,50 +93,61 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  document.body.style.overflow = ''
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
   document.removeEventListener('keydown', onKeydown)
 })
 </script>
 
 <template>
   <Teleport to="body">
-    <!-- Floating trigger -->
+    <!-- Floating trigger: Clover Bot Avatar with cursor focus (paused when modal open) -->
     <button
-      class="fixed bottom-6 right-6 z-[110] neu-accent h-12 px-5 rounded-full flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-transform"
+      class="fixed bottom-6 right-6 z-[110] neu-accent h-12 px-4 rounded-full flex items-center justify-center gap-2.5 hover:scale-105 active:scale-95 transition-transform shadow-xl"
       :aria-label="t('nav.askAI')"
       @click="open = !open"
     >
-      <GeminiIcon class="w-5 h-5 text-on-primary" />
+      <BotAvatar type="clover" :size="26" :interactive="!open" :paused="open" />
       <span class="text-on-primary font-bold text-sm">{{ t('nav.askAI') }}</span>
     </button>
 
     <Transition
-      enter-active-class="transition-opacity duration-300 ease-out"
+      enter-active-class="transition-opacity duration-200 ease-out"
       enter-from-class="opacity-0"
       enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-200 ease-in"
+      leave-active-class="transition-opacity duration-150 ease-in"
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
+      @after-leave="onModalAfterLeave"
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-8"
+        class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-8 transform-gpu will-change-transform"
         role="dialog"
         aria-modal="true"
       >
-        <!-- Blurred backdrop -->
-        <div class="absolute inset-0 bg-surface-base/70 backdrop-blur-xl backdrop-saturate-150" @click="closeChat" />
-
-        <!-- Modal -->
+        <!-- High-performance lightweight backdrop: avoids composite stalls on close -->
         <div
-          class="relative w-full max-w-lg h-[92vh] max-h-[860px] sm:h-[86vh] flex flex-col overflow-hidden rounded-[28px] neu-raised text-on-surface"
+          class="absolute inset-0 bg-black/40 backdrop-blur-[2px] sm:backdrop-blur-sm"
+          @click="closeChat"
+        />
+
+        <!-- Modal Card -->
+        <div
+          class="relative w-full max-w-lg h-[92vh] max-h-[860px] sm:h-[86vh] flex flex-col overflow-hidden rounded-[28px] neu-raised text-on-surface transform-gpu will-change-transform"
         >
-          <!-- Header -->
+          <!-- Header: Clover Bot Avatar with live working/idle state & cursor tracking -->
           <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-outline-variant/50 bg-surface-card">
             <div class="flex items-center gap-3">
-              <span class="relative w-10 h-10 rounded-full neu-accent flex items-center justify-center">
-                <GeminiIcon class="w-5 h-5 text-on-primary" />
-                <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-surface-card" />
+              <span class="relative w-10 h-10 rounded-full neu-accent flex items-center justify-center overflow-visible">
+                <BotAvatar
+                  type="clover"
+                  :size="30"
+                  :interactive="true"
+                  :state="loading ? 'working' : 'default'"
+                />
+                <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-surface-card pointer-events-none" />
               </span>
               <div>
                 <p class="text-[15px] font-bold leading-tight">{{ t('ai.title') }}</p>
@@ -142,6 +163,7 @@ onBeforeUnmount(() => {
                 {{ sessionEnded ? t('ai.closed') : `${questionsUsed}/${SESSION_LIMIT}` }}
               </span>
               <button
+                type="button"
                 class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/60 transition-colors"
                 aria-label="Tutup"
                 @click="closeChat"
@@ -152,12 +174,12 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Body -->
-          <div ref="scrollRef" class="flex-1 min-h-0 overflow-y-auto px-5 py-5 flex flex-col gap-3.5">
+          <div ref="scrollRef" class="flex-1 min-h-0 overflow-y-auto px-5 py-5 flex flex-col gap-3.5 custom-scrollbar">
             <!-- Welcome / greeting with quick pills -->
             <div v-if="!hasConversation" class="flex flex-col gap-5">
               <div class="flex gap-3">
-                <span class="w-9 h-9 rounded-full neu-accent flex items-center justify-center shrink-0">
-                  <GeminiIcon class="w-4 h-4 text-on-primary" />
+                <span class="w-9 h-9 rounded-full neu-accent flex items-center justify-center shrink-0 overflow-visible">
+                  <BotAvatar type="clover" :size="24" :interactive="true" />
                 </span>
                 <p class="text-[13.5px] leading-relaxed neu-raised rounded-2xl rounded-tl-sm border-l-2 border-primary bg-surface-container px-4 py-3">
                   {{ t('ai.greeting') }}
@@ -167,7 +189,8 @@ onBeforeUnmount(() => {
                 <button
                   v-for="q in quickQuestions"
                   :key="q"
-                  class="px-3.5 py-2 rounded-full text-[12px] font-medium neu-pressed hover:text-primary hover:scale-[1.03] active:scale-95 transition-all"
+                  type="button"
+                  class="px-3.5 py-2 rounded-full text-[12px] font-medium neu-pressed hover:text-primary hover:scale-[1.03] active:scale-95 transition-all text-left"
                   @click="send(q)"
                 >
                   {{ q }}
@@ -195,11 +218,13 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
+            <!-- Thinking Orb Animation when visitor chats and AI is processing -->
             <div v-if="loading" class="flex justify-start">
-              <div class="neu-raised px-4 py-3 rounded-full rounded-tl-sm bg-surface-container flex gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-primary animate-bounce" style="animation-delay: 0s" />
-                <span class="w-2 h-2 rounded-full bg-primary animate-bounce" style="animation-delay: 0.15s" />
-                <span class="w-2 h-2 rounded-full bg-primary animate-bounce" style="animation-delay: 0.3s" />
+              <div class="neu-raised px-4 py-2.5 rounded-2xl rounded-tl-sm bg-surface-container border-l-2 border-primary flex items-center gap-3">
+                <ThinkingOrb state="working" :size="26" color="#0284c7" :dot-size="1.8" />
+                <span class="text-xs font-semibold text-primary flex items-center gap-1.5">
+                  <span>{{ t('ai.thinking') }}</span>
+                </span>
               </div>
             </div>
 

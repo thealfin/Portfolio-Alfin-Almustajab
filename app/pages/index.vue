@@ -23,6 +23,7 @@ const { certifications } = await useCertifications()
     <div class="container-portfolio flex flex-col gap-9 md:gap-12 py-9 md:py-12">
       <AboutSection :profile="profile" />
       <ProjectsSection :projects="projects" />
+      <GithubActivitySection />
       <ExperienceSection :experiences="experiences" :certifications="certifications" />
       <StackSection :stacks="stacks" />
       <ThoughtsSection :thoughts="thoughts" />

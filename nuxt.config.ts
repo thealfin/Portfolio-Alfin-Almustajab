@@ -30,7 +30,13 @@ export default defineNuxtConfig({
   ],
 
   googleFonts: {
-    families: { Inter: [400, 500, 600, 700, 800] },
+    families: {
+      Inter: [400, 500, 600, 700, 800],
+      Caveat: [600, 700],
+      'Alex Brush': [400],
+      Sacramento: [400],
+      Amiri: [700],
+    },
     display: 'swap',
   },
 

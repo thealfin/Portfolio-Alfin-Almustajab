@@ -35,12 +35,13 @@ const avatarUrl = computed(() => props.profile?.avatar_url ?? '/alfin-photo.webp
         <span class="label-caps text-on-surface-variant">{{ t('about.fileLabel') }}</span>
       </div>
 
-      <div class="relative neu-pressed rounded-[20px] mt-6 md:mt-8 p-5 md:p-7 flex items-center justify-center overflow-hidden">
+      <!-- Profile Avatar Container: Scaled up and flush with bottom border (meper tanpa potongan) -->
+      <div class="relative neu-pressed rounded-[20px] mt-6 md:mt-8 pt-5 px-5 md:pt-7 md:px-7 pb-0 flex items-end justify-center overflow-hidden min-h-[360px] md:min-h-[420px]">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(0,91,178,0.10),transparent_62%)] pointer-events-none" />
         <img
           :src="avatarUrl"
           :alt="t('about.photoAlt')"
-          class="relative z-10 w-full max-w-[300px] md:max-w-[330px] h-auto object-contain mix-blend-normal drop-shadow-[0_20px_32px_rgba(17,28,44,0.25)]"
+          class="relative z-10 w-full max-w-[340px] md:max-w-[380px] h-auto object-cover object-bottom scale-110 sm:scale-115 md:scale-120 origin-bottom mix-blend-normal drop-shadow-[0_20px_32px_rgba(17,28,44,0.25)] block align-bottom -mb-0.5"
         />
       </div>
 
@@ -49,7 +50,10 @@ const avatarUrl = computed(() => props.profile?.avatar_url ?? '/alfin-photo.webp
       <div class="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <p class="headline-lg text-on-surface">{{ fullName }}</p>
-          <p class="title-md text-on-surface-variant mt-1">{{ t('about.role') }}</p>
+          <div class="title-md text-on-surface-variant mt-1 flex items-center gap-1.5 flex-wrap">
+            <span>Specialized as</span>
+            <RoleSwitcher custom-class="text-primary font-bold" />
+          </div>
         </div>
         <div class="neu-island rounded-full px-4 py-2 flex items-center gap-2">
           <span class="relative flex h-2.5 w-2.5">
@@ -73,9 +77,33 @@ const avatarUrl = computed(() => props.profile?.avatar_url ?? '/alfin-photo.webp
         <span class="text-primary">{{ t('about.headingItalic') }}</span>
       </h2>
 
-      <p class="label-caps text-on-surface-variant/70 tracking-[0.25em]">
-        {{ t('about.tags') }}
-      </p>
+      <!-- Infinite Marquee Roles Banner -->
+      <div class="w-full max-w-[560px] overflow-hidden py-1 select-none relative group border-y border-outline-variant/30 my-1">
+        <div class="flex items-center gap-6 whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused]">
+          <span class="label-caps text-on-surface-variant font-bold tracking-[0.2em] flex items-center gap-2">
+            <span class="text-primary font-black text-xs">||</span>
+            <span class="text-primary">•</span> Full-Stack
+            <span class="text-primary">•</span> UI UX Designer
+            <span class="text-primary">•</span> IT Support
+            <span class="text-primary">•</span> Digital Marketing
+            <span class="text-primary">•</span> AI Enthusiast
+            <span class="text-primary">•</span> Web Builder
+            <span class="text-primary">•</span> Copywriter
+            <span class="text-primary font-black text-xs">||</span>
+          </span>
+          <span class="label-caps text-on-surface-variant font-bold tracking-[0.2em] flex items-center gap-2" aria-hidden="true">
+            <span class="text-primary font-black text-xs">||</span>
+            <span class="text-primary">•</span> Full-Stack
+            <span class="text-primary">•</span> UI UX Designer
+            <span class="text-primary">•</span> IT Support
+            <span class="text-primary">•</span> Digital Marketing
+            <span class="text-primary">•</span> AI Enthusiast
+            <span class="text-primary">•</span> Web Builder
+            <span class="text-primary">•</span> Copywriter
+            <span class="text-primary font-black text-xs">||</span>
+          </span>
+        </div>
+      </div>
 
       <p class="body-lg text-on-surface-variant max-w-[560px]">
         {{ t('about.p1') }}

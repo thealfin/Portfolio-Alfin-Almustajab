@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Alex+Brush&family=Sacramento&family=Amiri:ital,wght@1,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -117,8 +119,56 @@ body {
     @apply mx-auto w-full max-w-7xl px-5 md:px-8;
   }
 
+  .font-apple-hello {
+    font-family: 'Caveat', 'Alex Brush', 'Sacramento', cursive;
+  }
+
+  .font-apple-arabic {
+    font-family: 'Amiri', 'Geeza Pro', 'Noto Sans Arabic', serif;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+    display: block;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(17, 28, 44, 0.05);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 91, 178, 0.25);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 91, 178, 0.5);
+  }
+
   .section-spacing {
     @apply py-12 md:py-16;
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 24s linear infinite;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
   }
 }
 
