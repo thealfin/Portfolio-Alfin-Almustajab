@@ -29,3 +29,5 @@ database
 .vercel
 .mockup UI
 .PLANNING
+.vercel
+.env*

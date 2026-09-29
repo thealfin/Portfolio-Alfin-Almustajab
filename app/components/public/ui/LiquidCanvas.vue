@@ -8,7 +8,7 @@ let renderer: THREE.WebGLRenderer | null = null
 let material: THREE.ShaderMaterial | null = null
 let mesh: THREE.Mesh | null = null
 let animationFrameId: number | null = null
-let clock: THREE.Clock | null = null
+let startTime = 0
 
 // Pointer coordinates for interactive ripples
 const targetMouse = { x: 0.5, y: 0.5 }
@@ -152,14 +152,14 @@ const initThree = () => {
     initThree()
   }, false)
 
-  clock = new THREE.Clock()
+  startTime = performance.now()
 
   // Continuous animation loop: NEVER stops on scroll or inspect
   const animate = () => {
     animationFrameId = requestAnimationFrame(animate)
 
-    if (clock && material) {
-      const elapsedTime = clock.getElapsedTime()
+    if (material) {
+      const elapsedTime = (performance.now() - startTime) * 0.001
       material.uniforms.uTime.value = elapsedTime
 
       currentMouse.x += (targetMouse.x - currentMouse.x) * 0.05

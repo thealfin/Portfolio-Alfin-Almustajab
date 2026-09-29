@@ -95,7 +95,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
         keepalive: true,
-      })
+      }).catch(() => {})
     } catch {}
   }
 
@@ -108,7 +108,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, duration }),
         keepalive: true,
-      })
+      }).catch(() => {})
     } catch {}
   }
 
