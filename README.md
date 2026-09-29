@@ -233,4 +233,4 @@ node scripts/seed-embeddings.mjs
 
 ---
 
-Built with ❤️ using [Nuxt 4](https://nuxt.com), [Three.js](https://threejs.org), [Supabase](https://supabase.com), and [Google Gemini](https://ai.google.dev).
+Built by enginerr b aja using [Nuxt 4](https://nuxt.com), [Three.js](https://threejs.org), [Supabase](https://supabase.com), and [Google Gemini](https://ai.google.dev).
