@@ -32,29 +32,88 @@ export interface ContributionsApiResponse {
   }
   contributions: ContributionDay[]
   activityFeed: MonthActivity[]
-  source: 'real-profile'
+  source: 'live-github' | 'cached-github' | 'fallback'
 }
 
-// 1. Exact Activity Breakdown matching Alfin's GitHub Profile data
-const REAL_ACTIVITY_FEED: MonthActivity[] = [
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+]
+
+const LEVEL_MAP: Record<string, number> = {
+  NONE: 0,
+  FIRST_QUARTILE: 1,
+  SECOND_QUARTILE: 2,
+  THIRD_QUARTILE: 3,
+  FOURTH_QUARTILE: 4,
+}
+
+// In-memory cache for GitHub API data (15 minutes TTL)
+interface CacheEntry<T> {
+  timestamp: number
+  data: T
+}
+
+const CACHE_TTL_MS = 15 * 60 * 1000
+const memoryCache = new Map<string, CacheEntry<any>>()
+
+function getFromCache<T>(key: string): T | null {
+  const item = memoryCache.get(key)
+  if (!item) return null
+  if (Date.now() - item.timestamp > CACHE_TTL_MS) {
+    memoryCache.delete(key)
+    return null
+  }
+  return item.data as T
+}
+
+function setToCache<T>(key: string, data: T): void {
+  memoryCache.set(key, { timestamp: Date.now(), data })
+}
+
+// Full Fallback Activity Feed matching real GitHub profile records
+const FALLBACK_ACTIVITY_FEED: MonthActivity[] = [
+  {
+    month: 'October',
+    year: 2026,
+    totalCommits: 3,
+    repos: [
+      {
+        name: 'thealfin/Katalog-Web-PPDB-Pesantren-Smart-Digital',
+        commits: 3,
+        url: 'https://github.com/thealfin/Katalog-Web-PPDB-Pesantren-Smart-Digital',
+        language: 'HTML',
+        date: '2026-10-04',
+      },
+    ],
+  },
   {
     month: 'September',
     year: 2026,
-    totalCommits: 26,
+    totalCommits: 29,
     repos: [
       {
         name: 'thealfin/Couplecash-Native',
         commits: 16,
-        url: 'https://github.com/thealfin/Couplecash-Native/commits?author=thealfin&since=2026-08-31&until=2026-09-28',
+        url: 'https://github.com/thealfin/Couplecash-Native',
         language: 'TypeScript',
-        date: 'Sep 12',
+        action: 'Created repository',
+        date: '2026-09-12',
       },
       {
         name: 'thealfin/couplecash',
         commits: 10,
-        url: 'https://github.com/thealfin/couplecash/commits?author=thealfin&since=2026-08-31&until=2026-09-28',
+        url: 'https://github.com/thealfin/couplecash',
         language: 'Vue',
-        date: 'Sep 6',
+        action: 'Created repository',
+        date: '2026-09-14',
+      },
+      {
+        name: 'thealfin/Portfolio-Alfin-Almustajab',
+        commits: 3,
+        url: 'https://github.com/thealfin/Portfolio-Alfin-Almustajab',
+        language: 'Vue',
+        date: '2026-09-29',
       },
     ],
   },
@@ -66,30 +125,34 @@ const REAL_ACTIVITY_FEED: MonthActivity[] = [
       {
         name: 'thealfin/Portfolio-Alfin-Almustajab',
         commits: 5,
-        url: 'https://github.com/thealfin/Portfolio-Alfin-Almustajab/commits?author=thealfin&since=2026-07-31&until=2026-08-31',
+        url: 'https://github.com/thealfin/Portfolio-Alfin-Almustajab',
         language: 'Vue',
-        date: 'Aug 20',
+        action: 'Created repository',
+        date: '2026-08-21',
       },
       {
         name: 'thealfin/Katalog-Web-PPDB-Pesantren-Smart-Digital',
         commits: 3,
-        url: 'https://github.com/thealfin/Katalog-Web-PPDB-Pesantren-Smart-Digital/commits?author=thealfin&since=2026-07-31&until=2026-08-31',
+        url: 'https://github.com/thealfin/Katalog-Web-PPDB-Pesantren-Smart-Digital',
         language: 'HTML',
-        date: 'Aug 23',
+        action: 'Created repository',
+        date: '2026-08-23',
       },
       {
         name: 'thealfin/Toko-Klontong',
         commits: 1,
-        url: 'https://github.com/thealfin/Toko-Klontong/commits?author=thealfin&since=2026-07-31&until=2026-08-31',
+        url: 'https://github.com/thealfin/Toko-Klontong',
         language: 'Vue',
-        date: 'Aug 24',
+        action: 'Created repository',
+        date: '2026-08-24',
       },
       {
         name: 'thealfin/Cek-Ongkir-Cak-App',
         commits: 1,
-        url: 'https://github.com/thealfin/Cek-Ongkir-Cak-App/commits?author=thealfin&since=2026-07-31&until=2026-08-31',
+        url: 'https://github.com/thealfin/Cek-Ongkir-Cak-App',
         language: 'TypeScript',
-        date: 'Aug 23',
+        action: 'Created repository',
+        date: '2026-08-23',
       },
     ],
   },
@@ -101,9 +164,9 @@ const REAL_ACTIVITY_FEED: MonthActivity[] = [
       {
         name: 'thealfin/Monitoring-Log-Error-Bug-Digital-Teknologi-Perkasa',
         commits: 3,
-        url: 'https://github.com/thealfin/Monitoring-Log-Error-Bug-Digital-Teknologi-Perkasa/commits?author=thealfin&since=2026-01-31&until=2026-02-28',
+        url: 'https://github.com/thealfin/Monitoring-Log-Error-Bug-Digital-Teknologi-Perkasa',
         language: 'HTML',
-        date: 'Feb 9 - Feb 10',
+        date: '2026-02-10',
       },
     ],
   },
@@ -115,30 +178,30 @@ const REAL_ACTIVITY_FEED: MonthActivity[] = [
       {
         name: 'thealfin/KIOSK-Gateway-Padang-Sederhana',
         commits: 20,
-        url: 'https://github.com/thealfin/KIOSK-Gateway-Padang-Sederhana/commits?author=thealfin&since=2025-12-31&until=2026-01-31',
+        url: 'https://github.com/thealfin/KIOSK-Gateway-Padang-Sederhana',
         language: 'HTML',
-        date: 'Jan 21',
+        date: '2026-01-23',
       },
       {
         name: 'thealfin/Mbanking',
         commits: 10,
-        url: 'https://github.com/thealfin/Mbanking/commits?author=thealfin&since=2025-12-31&until=2026-01-31',
+        url: 'https://github.com/thealfin/Mbanking',
         language: 'Vue',
-        date: 'Jan 13',
+        date: '2026-01-13',
       },
       {
         name: 'thealfin/Monitoring-Log-Error-Bug-Digital-Teknologi-Perkasa',
         commits: 6,
-        url: 'https://github.com/thealfin/Monitoring-Log-Error-Bug-Digital-Teknologi-Perkasa/commits?author=thealfin&since=2025-12-31&until=2026-01-31',
+        url: 'https://github.com/thealfin/Monitoring-Log-Error-Bug-Digital-Teknologi-Perkasa',
         language: 'HTML',
-        date: 'Jan 30',
+        date: '2026-01-31',
       },
       {
         name: 'thealfin/Warung-Padang-Gateway',
         commits: 1,
-        url: 'https://github.com/thealfin/Warung-Padang-Gateway/commits?author=thealfin&since=2025-12-31&until=2026-01-31',
+        url: 'https://github.com/thealfin/Warung-Padang-Gateway',
         language: 'HTML',
-        date: 'Jan 18',
+        date: '2026-01-18',
       },
     ],
   },
@@ -150,16 +213,16 @@ const REAL_ACTIVITY_FEED: MonthActivity[] = [
       {
         name: 'thealfin/Web-digitek',
         commits: 13,
-        url: 'https://github.com/thealfin/Web-digitek/commits?author=thealfin&since=2025-11-30&until=2025-12-31',
+        url: 'https://github.com/thealfin/Web-digitek',
         language: 'HTML',
-        date: 'Dec 23',
+        date: '2025-12-23',
       },
       {
         name: 'thealfin/Web-Digital-Teknologi-Perkasa',
         commits: 3,
-        url: 'https://github.com/thealfin/Web-Digital-Teknologi-Perkasa/commits?author=thealfin&since=2025-11-30&until=2025-12-31',
+        url: 'https://github.com/thealfin/Web-Digital-Teknologi-Perkasa',
         language: 'HTML',
-        date: 'Dec 23',
+        date: '2025-12-24',
       },
     ],
   },
@@ -171,16 +234,16 @@ const REAL_ACTIVITY_FEED: MonthActivity[] = [
       {
         name: 'thealfin/ponpes-daruttaqwa',
         commits: 7,
-        url: 'https://github.com/thealfin/ponpes-daruttaqwa/commits?author=thealfin&since=2025-09-30&until=2025-10-31',
+        url: 'https://github.com/thealfin/ponpes-daruttaqwa',
         language: 'HTML',
-        date: 'Oct 23',
+        date: '2025-10-24',
       },
       {
         name: 'thealfin/ponpes-darussalam',
         commits: 5,
-        url: 'https://github.com/thealfin/ponpes-darussalam/commits?author=thealfin&since=2025-09-30&until=2025-10-31',
+        url: 'https://github.com/thealfin/ponpes-darussalam',
         language: 'HTML',
-        date: 'Oct 15',
+        date: '2025-10-16',
       },
     ],
   },
@@ -192,9 +255,9 @@ const REAL_ACTIVITY_FEED: MonthActivity[] = [
       {
         name: 'thealfin/Web-E-Lapak-Pontren',
         commits: 7,
-        url: 'https://github.com/thealfin/Web-E-Lapak-Pontren/commits?author=thealfin&since=2025-08-31&until=2025-09-30',
+        url: 'https://github.com/thealfin/Web-E-Lapak-Pontren',
         language: 'Vue',
-        date: 'Sep 3',
+        date: '2025-09-04',
       },
     ],
   },
@@ -206,9 +269,9 @@ const REAL_ACTIVITY_FEED: MonthActivity[] = [
       {
         name: 'thealfin/Web-cari-item-mlbb',
         commits: 4,
-        url: 'https://github.com/thealfin/Web-cari-item-mlbb/commits?author=thealfin&since=2025-07-31&until=2025-08-31',
+        url: 'https://github.com/thealfin/Web-cari-item-mlbb',
         language: 'HTML',
-        date: 'Aug 15',
+        date: '2025-08-15',
       },
     ],
   },
@@ -220,17 +283,17 @@ const REAL_ACTIVITY_FEED: MonthActivity[] = [
       {
         name: 'thealfin/web.pribadi',
         commits: 2,
-        url: 'https://github.com/thealfin/web.pribadi/commits?author=thealfin&since=2025-06-30&until=2025-07-31',
+        url: 'https://github.com/thealfin/web.pribadi',
         language: 'HTML',
-        date: 'Jul 28',
-        action: 'Created their first repository (Public)',
+        action: 'Created repository',
+        date: '2025-07-28',
       },
     ],
   },
 ]
 
-// 2. Real Daily Contributions Map exactly matching Alfin's GitHub screenshot (86 in 2026, 49 in 2025)
-const REAL_2026_DAYS: Record<string, { count: number; level: number; repos: string[] }> = {
+// Static Fallback Data in case GitHub API is unreachable
+const FALLBACK_2026_DAYS: Record<string, { count: number; level: number; repos: string[] }> = {
   '2026-01-13': { count: 10, level: 3, repos: ['thealfin/Mbanking'] },
   '2026-01-18': { count: 1, level: 1, repos: ['thealfin/Warung-Padang-Gateway'] },
   '2026-01-21': { count: 20, level: 4, repos: ['thealfin/KIOSK-Gateway-Padang-Sederhana'] },
@@ -250,11 +313,13 @@ const REAL_2026_DAYS: Record<string, { count: number; level: number; repos: stri
   '2026-09-10': { count: 1, level: 1, repos: ['thealfin/Couplecash-Native'] },
   '2026-09-12': { count: 13, level: 3, repos: ['thealfin/Couplecash-Native'] },
   '2026-09-14': { count: 1, level: 1, repos: ['thealfin/Couplecash-Native'] },
+  '2026-09-29': { count: 3, level: 2, repos: ['thealfin/Portfolio-Alfin-Almustajab'] },
+  '2026-10-04': { count: 3, level: 2, repos: ['thealfin/Katalog-Web-PPDB-Pesantren-Smart-Digital'] },
 }
 
-const REAL_2025_DAYS: Record<string, { count: number; level: number; repos: string[] }> = {
+const FALLBACK_2025_DAYS: Record<string, { count: number; level: number; repos: string[] }> = {
   '2025-06-18': { count: 2, level: 2, repos: ['thealfin/web.pribadi'] },
-  '2025-07-28': { count: 3, level: 4, repos: ['thealfin/web.pribadi (First repo created)'] },
+  '2025-07-28': { count: 3, level: 4, repos: ['thealfin/web.pribadi (Created repository)'] },
   '2025-08-15': { count: 4, level: 4, repos: ['thealfin/Web-cari-item-mlbb'] },
   '2025-09-03': { count: 7, level: 4, repos: ['thealfin/Web-E-Lapak-Pontren'] },
   '2025-09-04': { count: 2, level: 2, repos: ['thealfin/Web-E-Lapak-Pontren'] },
@@ -266,13 +331,11 @@ const REAL_2025_DAYS: Record<string, { count: number; level: number; repos: stri
   '2025-12-24': { count: 3, level: 4, repos: ['thealfin/Web-Digital-Teknologi-Perkasa'] },
 }
 
-// Helper to generate full calendar grid for a specific year
-function generateYearGrid(year: number): ContributionDay[] {
+function generateFallbackGrid(year: number): ContributionDay[] {
   const list: ContributionDay[] = []
   const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
   const daysInYear = isLeap ? 366 : 365
-
-  const dayMap = year === 2026 ? REAL_2026_DAYS : REAL_2025_DAYS
+  const dayMap = year === 2026 ? FALLBACK_2026_DAYS : FALLBACK_2025_DAYS
 
   for (let i = 0; i < daysInYear; i++) {
     const current = new Date(year, 0, 1 + i)
@@ -301,23 +364,282 @@ function generateYearGrid(year: number): ContributionDay[] {
   return list
 }
 
-export default defineEventHandler((event): ContributionsApiResponse => {
+const GITHUB_GRAPHQL_QUERY = `
+query GetUserContributions($login: String!, $from: DateTime!, $to: DateTime!) {
+  user(login: $login) {
+    contributionsCollection {
+      contributionYears
+    }
+    targetCollection: contributionsCollection(from: $from, to: $to) {
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays {
+            date
+            contributionCount
+            contributionLevel
+          }
+        }
+      }
+      commitContributionsByRepository(maxRepositories: 50) {
+        repository {
+          nameWithOwner
+          name
+          url
+          primaryLanguage {
+            name
+          }
+        }
+        contributions(first: 100) {
+          totalCount
+          nodes {
+            occurredAt
+            commitCount
+          }
+        }
+      }
+      repositoryContributions(first: 50) {
+        nodes {
+          occurredAt
+          repository {
+            nameWithOwner
+            name
+            url
+            primaryLanguage {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`
+
+export default defineEventHandler(async (event): Promise<ContributionsApiResponse> => {
   const query = getQuery(event)
-  const reqYear = query.year ? parseInt(String(query.year), 10) : 2026
-  const targetYear = reqYear === 2025 ? 2025 : 2026
+  const reqYear = query.year ? parseInt(String(query.year), 10) : new Date().getFullYear()
+  const targetYear = isNaN(reqYear) ? 2026 : reqYear
 
-  const contributions = generateYearGrid(targetYear)
+  const config = useRuntimeConfig(event)
+  const token = (config.githubToken as string) || process.env.GITHUB_TOKEN || ''
+  const username = (config.githubUsername as string) || process.env.GITHUB_USERNAME || ''
 
-  return {
-    selectedYear: targetYear,
-    availableYears: [2026, 2025],
-    totals: {
-      '2026': 86,
+  const cacheKey = `gh_contrib_${username}_${targetYear}`
+  const cachedResponse = getFromCache<ContributionsApiResponse>(cacheKey)
+  if (cachedResponse) {
+    return {
+      ...cachedResponse,
+      source: 'cached-github',
+    }
+  }
+
+  // If no token or username is provided, return fallback immediately with filled activityFeed
+  if (!token || !username) {
+    return {
+      selectedYear: targetYear,
+      availableYears: [2026, 2025],
+      totals: {
+        '2026': 92,
+        '2025': 49,
+        allTime: 141,
+      },
+      contributions: generateFallbackGrid(targetYear),
+      activityFeed: FALLBACK_ACTIVITY_FEED.filter((a) => a.year === targetYear),
+      source: 'fallback',
+    }
+  }
+
+  try {
+    const fromDate = `${targetYear}-01-01T00:00:00Z`
+    const toDate = `${targetYear}-12-31T23:59:59Z`
+
+    const response = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'User-Agent': 'Nuxt-Portfolio-App',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: GITHUB_GRAPHQL_QUERY,
+        variables: {
+          login: username,
+          from: fromDate,
+          to: toDate,
+        },
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`GitHub GraphQL API returned status ${response.status}`)
+    }
+
+    const resJson = await response.json()
+    const userData = resJson.data?.user
+    if (!userData || !userData.targetCollection) {
+      throw new Error('Invalid user or contributions data returned from GitHub')
+    }
+
+    const availableYears: number[] = userData.contributionsCollection?.contributionYears || [2026, 2025]
+    const targetCollection = userData.targetCollection
+    const calendar = targetCollection.contributionCalendar
+
+    // 1. Map commit dates & repo creations to repos
+    const dateToRepos = new Map<string, Set<string>>()
+    const monthMap = new Map<number, Map<string, {
+      name: string
+      commits: number
+      url: string
+      language?: string
+      action?: string
+      dates: string[]
+    }>>()
+
+    // Process commit contributions
+    for (const item of targetCollection.commitContributionsByRepository || []) {
+      const repoName = item.repository.nameWithOwner
+      const repoUrl = item.repository.url
+      const lang = item.repository.primaryLanguage?.name
+
+      for (const node of item.contributions?.nodes || []) {
+        const dateStr = node.occurredAt.split('T')[0]
+        if (!dateToRepos.has(dateStr)) dateToRepos.set(dateStr, new Set())
+        dateToRepos.get(dateStr)!.add(repoName)
+
+        const d = new Date(node.occurredAt)
+        const mIdx = d.getUTCMonth()
+        if (!monthMap.has(mIdx)) monthMap.set(mIdx, new Map())
+        const mRepos = monthMap.get(mIdx)!
+        if (!mRepos.has(repoName)) {
+          mRepos.set(repoName, {
+            name: repoName,
+            commits: 0,
+            url: repoUrl,
+            language: lang,
+            dates: [],
+          })
+        }
+        const rEntry = mRepos.get(repoName)!
+        rEntry.commits += node.commitCount
+        rEntry.dates.push(dateStr)
+      }
+    }
+
+    // Process repo creation events
+    for (const node of targetCollection.repositoryContributions?.nodes || []) {
+      const dateStr = node.occurredAt.split('T')[0]
+      const repoName = node.repository.nameWithOwner
+      if (!dateToRepos.has(dateStr)) dateToRepos.set(dateStr, new Set())
+      dateToRepos.get(dateStr)!.add(`${repoName} (Created repository)`)
+
+      const d = new Date(node.occurredAt)
+      const mIdx = d.getUTCMonth()
+      if (!monthMap.has(mIdx)) monthMap.set(mIdx, new Map())
+      const mRepos = monthMap.get(mIdx)!
+      if (!mRepos.has(repoName)) {
+        mRepos.set(repoName, {
+          name: repoName,
+          commits: 0,
+          url: node.repository.url,
+          language: node.repository.primaryLanguage?.name,
+          action: 'Created repository',
+          dates: [dateStr],
+        })
+      } else {
+        mRepos.get(repoName)!.action = 'Created repository'
+      }
+    }
+
+    // 2. Flatten calendar weeks into ContributionDay array
+    const contributions: ContributionDay[] = []
+    for (const week of calendar.weeks || []) {
+      for (const day of week.contributionDays || []) {
+        const repoSet = dateToRepos.get(day.date)
+        const count = day.contributionCount || 0
+        let level = LEVEL_MAP[day.contributionLevel] ?? 0
+        if (count > 0 && level === 0) level = 1
+
+        contributions.push({
+          date: day.date,
+          count,
+          level,
+          repos: repoSet && repoSet.size > 0 ? Array.from(repoSet) : undefined,
+        })
+      }
+    }
+
+    // 3. Build Activity Feed
+    const activityFeed: MonthActivity[] = []
+    const sortedMonths = Array.from(monthMap.keys()).sort((a, b) => b - a)
+
+    for (const mIdx of sortedMonths) {
+      const reposMap = monthMap.get(mIdx)!
+      const reposList = Array.from(reposMap.values()).sort((a, b) => b.commits - a.commits)
+      const totalCommits = reposList.reduce((acc, curr) => acc + curr.commits, 0)
+
+      activityFeed.push({
+        month: MONTH_NAMES[mIdx],
+        year: targetYear,
+        totalCommits,
+        repos: reposList.map(r => ({
+          name: r.name,
+          commits: r.commits,
+          url: r.url,
+          language: r.language,
+          action: r.action,
+          date: r.dates.length > 0 ? r.dates[0] : undefined,
+        })),
+      })
+    }
+
+    // If activityFeed from live is empty (e.g. earlier year without nodes), fallback to snapshot
+    const finalActivityFeed = activityFeed.length > 0 
+      ? activityFeed 
+      : FALLBACK_ACTIVITY_FEED.filter((a) => a.year === targetYear)
+
+    // 4. Totals per year
+    const totals: Record<string, number> = {
+      '2026': 92,
       '2025': 49,
-      allTime: 135,
-    },
-    contributions,
-    activityFeed: REAL_ACTIVITY_FEED.filter((a) => a.year === targetYear),
-    source: 'real-profile',
+      allTime: 141,
+    }
+    // Update targetYear total dynamically
+    totals[String(targetYear)] = calendar.totalContributions
+    let sumAll = 0
+    for (const y of availableYears) {
+      if (y === targetYear) {
+        sumAll += calendar.totalContributions
+      } else {
+        sumAll += totals[String(y)] ?? 0
+      }
+    }
+    totals.allTime = sumAll
+
+    const result: ContributionsApiResponse = {
+      selectedYear: targetYear,
+      availableYears,
+      totals,
+      contributions,
+      activityFeed: finalActivityFeed,
+      source: 'live-github',
+    }
+
+    setToCache(cacheKey, result)
+    return result
+  } catch (error) {
+    console.error('Error fetching live GitHub contributions:', error)
+    return {
+      selectedYear: targetYear,
+      availableYears: [2026, 2025],
+      totals: {
+        '2026': 92,
+        '2025': 49,
+        allTime: 141,
+      },
+      contributions: generateFallbackGrid(targetYear),
+      activityFeed: FALLBACK_ACTIVITY_FEED.filter((a) => a.year === targetYear),
+      source: 'fallback',
+    }
   }
 })

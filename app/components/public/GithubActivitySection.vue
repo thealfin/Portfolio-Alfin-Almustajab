@@ -38,7 +38,7 @@ export interface ContributionsApiResponse {
 
 const { t } = useI18n()
 const selectedYear = ref<number>(2026)
-const showActivityFeed = ref(true)
+const showActivityFeed = ref(false)
 
 // Fetch real data from server API with reactive year
 const { data, status } = await useFetch<ContributionsApiResponse>(
@@ -52,10 +52,18 @@ const { data, status } = await useFetch<ContributionsApiResponse>(
 
 const isLoading = computed(() => status.value === 'pending')
 
+const availableYears = computed(() => {
+  return data.value?.availableYears && data.value.availableYears.length > 0
+    ? data.value.availableYears
+    : [2026, 2025]
+})
+
 const currentYearTotal = computed(() => {
-  if (selectedYear.value === 2026) return data.value?.totals?.['2026'] ?? 86
-  if (selectedYear.value === 2025) return data.value?.totals?.['2025'] ?? 49
-  return 86
+  const yr = String(selectedYear.value)
+  if (data.value?.totals?.[yr] !== undefined) {
+    return data.value.totals[yr]
+  }
+  return 0
 })
 
 // Organize contributions into weeks (7 days each: Sunday to Saturday)
@@ -208,31 +216,24 @@ const getLevelClass = (level: number) => {
 
         <!-- Sisi Kanan: Year Selector & Direct Profile Badge -->
         <div class="flex items-center gap-3 flex-wrap">
-          <!-- Year Selector (2026 / 2025) ala GitHub Profile -->
-          <div class="flex items-center p-1 rounded-full bg-[var(--surface-base)] border border-outline-variant/50 text-xs font-bold">
+          <!-- Year Selector (dynamically from availableYears) -->
+          <div
+            v-if="availableYears.length > 1"
+            class="flex items-center p-1 rounded-full bg-[var(--surface-base)] border border-outline-variant/50 text-xs font-bold"
+          >
             <button
+              v-for="yr in availableYears"
+              :key="yr"
               type="button"
               :class="[
                 'px-3.5 py-1 rounded-full transition-all duration-200',
-                selectedYear === 2026
+                selectedYear === yr
                   ? 'bg-primary text-white shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
               ]"
-              @click="selectedYear = 2026"
+              @click="selectedYear = yr"
             >
-              2026
-            </button>
-            <button
-              type="button"
-              :class="[
-                'px-3.5 py-1 rounded-full transition-all duration-200',
-                selectedYear === 2025
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-on-surface-variant hover:text-on-surface'
-              ]"
-              @click="selectedYear = 2025"
-            >
-              2025
+              {{ yr }}
             </button>
           </div>
 
@@ -393,10 +394,11 @@ const getLevelClass = (level: number) => {
           </h3>
           <button
             type="button"
-            class="text-xs font-semibold text-primary hover:underline"
+            class="text-xs font-semibold text-primary hover:text-primary-strong transition-colors inline-flex items-center gap-1.5 px-3 py-1 rounded-full neu-raised hover:neu-pressed active:scale-95"
             @click="showActivityFeed = !showActivityFeed"
           >
-            {{ showActivityFeed ? 'Collapse' : 'Expand' }}
+            <span>{{ showActivityFeed ? t('github.collapse') : t('github.expand') }}</span>
+            <Icon :name="showActivityFeed ? 'ph:caret-up-bold' : 'ph:caret-down-bold'" class="w-3 h-3 text-primary" />
           </button>
         </div>
 

@@ -17,22 +17,32 @@ const error = ref<string | null>(null)
 
 const form = reactive({
   name: props.stack?.name ?? '',
+  category: props.stack?.category ?? 'frontend',
   icon_url: props.stack?.icon_url ?? '',
   sort_order: props.stack?.sort_order ?? 0,
   is_active: props.stack?.is_active ?? true,
   gemini: props.stack?.gemini ?? false,
 })
 
+const categories = [
+  { value: 'frontend', label: 'Frontend', icon: 'ph:layout-bold' },
+  { value: 'backend', label: 'Backend', icon: 'ph:cpu-bold' },
+  { value: 'devops', label: 'Data & DevOps', icon: 'ph:database-bold' },
+  { value: 'rag', label: 'Sistem RAG', icon: 'ph:graph-bold' },
+  { value: 'llm', label: 'Integrasi LLM', icon: 'ph:sparkle-bold' },
+]
+
 const submit = async () => {
   loading.value = true
   error.value = null
   if (!form.name.trim()) {
-    error.value = t('stackName') + ' wajib diisi.'
+    error.value = t('admin.stackName') + ' wajib diisi.'
     loading.value = false
     return
   }
   const payload = {
     name: form.name.trim(),
+    category: form.category,
     icon_url: form.icon_url.trim() || null,
     sort_order: Number(form.sort_order) || 0,
     is_active: form.is_active,
@@ -63,6 +73,24 @@ const submit = async () => {
       <div class="flex flex-col gap-1.5">
         <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.stackName') }}</label>
         <input v-model="form.name" required placeholder="Vue" class="neu-pressed rounded-full px-5 py-2.5 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary" />
+      </div>
+
+      <!-- Bento Category Selector -->
+      <div class="flex flex-col gap-1.5">
+        <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.stackCategory') }}</label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <button
+            v-for="cat in categories"
+            :key="cat.value"
+            type="button"
+            class="px-3 py-2 rounded-xl body-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 select-none text-left"
+            :class="form.category === cat.value ? 'neu-pressed text-primary font-bold' : 'neu-raised text-on-surface-variant hover:text-on-surface'"
+            @click="form.category = cat.value"
+          >
+            <Icon :name="cat.icon" class="text-base shrink-0" />
+            <span class="truncate">{{ cat.label }}</span>
+          </button>
+        </div>
       </div>
 
       <div class="flex flex-col gap-1.5">

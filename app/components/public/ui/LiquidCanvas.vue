@@ -252,7 +252,6 @@ onBeforeUnmount(() => {
 
   scene = null
   camera = null
-  clock = null
 })
 </script>
 

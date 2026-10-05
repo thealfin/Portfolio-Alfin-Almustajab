@@ -69,6 +69,8 @@ export default defineNuxtConfig({
     supabaseUrl: process.env.SUPABASE_URL || 'https://wrwgmmapexljecjnxirk.supabase.co',
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
+    githubToken: process.env.GITHUB_TOKEN || '',
+    githubUsername: process.env.GITHUB_USERNAME || '',
     public: {
       supabaseUrl: process.env.SUPABASE_URL || 'https://wrwgmmapexljecjnxirk.supabase.co',
       supabaseKey: process.env.SUPABASE_KEY || '',
@@ -82,9 +84,9 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'id' },
-      titleTemplate: '%s — Alfin Almustajab',
+      titleTemplate: '%s Alfin Almustajab',
       meta: [
-        { name: 'description', content: 'Portofolio Alfin Almustajab — Front-End Developer & IT Support.' },
+        { name: 'description', content: 'Portofolio Alfin Almustajab Full-Stack Programer, UI UX Designer & IT Support.' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       ],
       link: [

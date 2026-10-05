@@ -46,14 +46,31 @@
   },
   "featured": {
     "title": "Selected Work",
+    "pretitle": "Portfolio Highlights",
     "viewAll": "View All Archive"
   },
   "stack": {
     "title": "Tech & AI Stack",
-    "subtitle": "Technologies I use to build digital products."
+    "pretitle": "Digital Craftsman's Toolkit",
+    "subtitle": "A collection of technologies, architectural frameworks, and AI ecosystems leveraged to build production-grade modern software.",
+    "masteredCount": "{n} Technologies Integrated",
+    "techCount": "{n} technologies",
+    "frontendTitle": "Frontend",
+    "frontendDesc": "Reactive user interfaces & high-performance responsive designs crafted for peak accessibility.",
+    "backendTitle": "Backend",
+    "backendDesc": "High-velocity microservices, secure RESTful / GraphQL APIs, and event-driven architectures.",
+    "devopsTitle": "Data & DevOps",
+    "devopsDesc": "Persistent ACID/NoSQL storage, message brokers, serverless cloud, and container orchestration.",
+    "ragBadge": "Vector Pipeline",
+    "ragTitle": "RAG Systems (Retrieval-Augmented Generation)",
+    "ragDesc": "Building document search pipelines powered by Vector Databases (Chroma, Pinecone, pgvector) and intelligent reranking to produce hallucination-free responses for enterprise data.",
+    "llmBadge": "Autonomous Agents",
+    "llmTitle": "LLM Integration & Workflow Automation",
+    "llmDesc": "Integrating GPT-4o, Claude 3.5, and Google Gemini API into corporate workflows, automated document verification, function calling, and resilient multi-turn conversational AI."
   },
   "experience": {
     "title": "Experience",
+    "pretitle": "Career Path",
     "subtitle": "A journey of crafting digital products and reliable technical solutions.",
     "education": "Education",
     "certifications": "Certifications",
@@ -86,6 +103,7 @@
   },
   "thoughts": {
     "title": "Monologue Room",
+    "pretitle": "Ink & Code",
     "subtitle": "A personal journal & notes on technology, design, and the process of making.",
     "readTime": "{n} min read",
     "readArticle": "Read Article",
@@ -97,6 +115,7 @@
   },
   "testimonials": {
     "title": "Testimonials",
+    "pretitle": "What They Say",
     "subtitle": "What colleagues and clients say about working with me."
   },
   "contact": {
@@ -110,7 +129,12 @@
     "email": "EMAIL",
     "subject": "SUBJECT",
     "message": "MESSAGE",
-    "subjectOptions": ["Project Inquiry", "Freelance Opportunity", "Collaboration", "Other"],
+    "subjectOptions": [
+      "Project Inquiry",
+      "Freelance Opportunity",
+      "Collaboration",
+      "Other"
+    ],
     "sendMessage": "Send Message",
     "sending": "Sending...",
     "successTitle": "Message Sent",
@@ -362,7 +386,6 @@
     "contentEn": "Content (English)",
     "contentPlaceholder": "Write the article... use a blank line for a new paragraph.",
     "thoughtCategory": "Category (comma separated)",
-    "coverImage": "Cover Image",
     "readTime": "Read Time (minutes)",
     "isPublished": "Publish (visible to public)",
     "views": "Views",
@@ -398,7 +421,27 @@
     "anSectionTitle": "Visitor Analytics",
     "anSectionSubtitle": "Visit summary & latest visitor details",
     "anViewFull": "View Full Analytics",
-    "anRecentVisitors": "Recent Visitors"
+    "anRecentVisitors": "Recent Visitors",
+    "anDomain": "Domain / Website",
+    "anAllDomains": "All Domains",
+    "anDomainBreakdown": "Domain & Duration Comparison",
+    "anDomainBreakdownSubtitle": "Access duration & visit metrics between www.allfine.my.id & portfolio-alfin-six.vercel.app",
+    "anSessionStarted": "Session Started",
+    "anLastActive": "Last Active",
+    "anIpAddress": "IP Address",
+    "anCoordinates": "Coordinates",
+    "anScreens": "Screen Sizes",
+    "anLanguages": "Visitor Languages",
+    "anSearchVisitors": "Search IP, city, device, browser, or page...",
+    "anStatusOnline": "Online",
+    "anStatusEnded": "Ended",
+    "stackCategory": "Bento Section / Category",
+    "categoryAll": "All",
+    "categoryFrontend": "Frontend",
+    "categoryBackend": "Backend",
+    "categoryDevops": "Data & DevOps",
+    "categoryRag": "RAG System",
+    "categoryLlm": "LLM Integration"
   },
   "github": {
     "kicker": "OPEN SOURCE CONTRIBUTIONS",
@@ -409,6 +452,8 @@
     "longestStreak": "Longest Streak",
     "bestDay": "Best Day",
     "less": "Less",
-    "more": "More"
+    "more": "More",
+    "collapse": "Collapse Details",
+    "expand": "Expand Details"
   }
 }

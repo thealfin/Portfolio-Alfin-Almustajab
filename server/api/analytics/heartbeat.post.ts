@@ -1,17 +1,38 @@
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  let body: any
+  try {
+    body = await readBody(event)
+    if (typeof body === 'string') {
+      body = JSON.parse(body)
+    }
+  } catch {
+    body = {}
+  }
+
   const supabase = useSupabaseServer()
 
-  const sessionId = String(body?.session_id ?? '').slice(0, 100)
-  if (!sessionId) throw createError({ statusCode: 400, statusMessage: 'session_id wajib diisi' })
+  const sessionId = String(body?.session_id ?? '').slice(0, 100).trim()
+  if (!sessionId) {
+    return { success: false, message: 'session_id wajib diisi' }
+  }
 
   const duration = Math.max(0, Math.min(60 * 60 * 24 * 7, Math.round(Number(body?.duration) || 0)))
+  const lastActive = body?.last_active_at && !Number.isNaN(Date.parse(body.last_active_at))
+    ? new Date(body.last_active_at).toISOString()
+    : new Date().toISOString()
 
   const { error } = await supabase
     .from('visitor_analytics')
-    .update({ duration_seconds: duration, last_active_at: new Date().toISOString() })
+    .update({
+      duration_seconds: duration,
+      last_active_at: lastActive,
+    })
     .eq('session_id', sessionId)
 
-  if (error) throw createError({ statusCode: 500, statusMessage: error.message })
+  if (error) {
+    console.error('[analytics/heartbeat] Supabase update error:', error.message)
+    return { success: false, error: error.message }
+  }
+
   return { success: true }
 })

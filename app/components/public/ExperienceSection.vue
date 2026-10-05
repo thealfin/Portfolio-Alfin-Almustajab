@@ -32,7 +32,7 @@ const periodLabel = (e: any) => {
     :viewport="{ once: true, margin: '-80px' }"
     :transition="{ duration: 0.7 }"
   >
-    <SectionHeading :eyebrow="t('experience.title')">
+    <SectionHeading :eyebrow="t('experience.pretitle')">
       {{ t('experience.title') }}
     </SectionHeading>
 

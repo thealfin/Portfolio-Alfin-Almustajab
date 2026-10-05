@@ -12,7 +12,7 @@ export function useAdmin() {
 
   const stats = () => call('get', '/admin/stats')
   const activity = (days = 7) => call('get', `/admin/activity?days=${days}`)
-  const analytics = (days = 7) => call('get', `/admin/analytics?days=${days}`)
+  const analytics = (days = 7, domain = 'all') => call('get', `/admin/analytics?days=${days}&domain=${encodeURIComponent(domain)}`)
   const listProjects = () => call('get', '/admin/projects')
   const createProject = (p: any) => call('post', '/admin/projects', p)
   const updateProject = (id: string, p: any) => call('patch', `/admin/projects/${id}`, p)

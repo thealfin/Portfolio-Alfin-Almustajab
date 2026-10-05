@@ -35,7 +35,7 @@ watch(active, () => {})
     :viewport="{ once: true, margin: '-80px' }"
     :transition="{ duration: 0.7 }"
   >
-    <SectionHeading :eyebrow="t('testimonials.title')">
+    <SectionHeading :eyebrow="t('testimonials.pretitle')">
       {{ t('testimonials.title') }}
     </SectionHeading>
 

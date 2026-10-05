@@ -2,7 +2,7 @@
 
 # Alfin Almustajab — Official Web Portfolio
 
-**Front-End Developer & IT Support** · Nuxt 4 + Supabase + Gemini AI
+**Full-Stack Programer, UI/UX Designer & IT Support** · Nuxt 4 + Supabase + RAG AI
 
 A modern, highly immersive personal portfolio featuring an interactive **Three.js Liquid Background**, an Apple-inspired **Multilingual Welcome Preloader**, an eye-tracking **Clover AI Assistant (RAG)** with real-time **Thinking Orbs**, an authentic **GitHub Contribution Heatmap**, and a comprehensive **Admin Panel** with visitor analytics.
 
@@ -25,14 +25,14 @@ A modern, highly immersive personal portfolio featuring an interactive **Three.j
 
 ### Homepage Sections
 
-| | | |
-|:---:|:---:|:---:|
-| <img src="docs/screenshots/home-hero.png" alt="Hero" width="100%"/> | <img src="docs/screenshots/home-about.png" alt="About" width="100%"/> | <img src="docs/screenshots/home-projects.png" alt="Projects" width="100%"/> |
-| **Hero & Three.js Liquid Canvas** | **About & Bio** | **Featured Projects** |
-| <img src="docs/screenshots/home-experience.png" alt="Experience" width="100%"/> | <img src="docs/screenshots/home-stack.png" alt="Tech Stack" width="100%"/> | <img src="docs/screenshots/home-thoughts.png" alt="Thoughts" width="100%"/> |
-| **Experience Timeline** | **Tech & AI Stack** | **Thoughts / Writing** |
-| <img src="docs/screenshots/home-testimonials.png" alt="Testimonials" width="100%"/> | <img src="docs/screenshots/home-contact.png" alt="Contact" width="100%"/> | <img src="docs/screenshots/admin-login.png" alt="Admin login" width="100%"/> |
-| **Testimonials** | **Contact / CTA** | **Admin Login** |
+|                                                                                     |                                                                            |                                                                              |
+| :---------------------------------------------------------------------------------: | :------------------------------------------------------------------------: | :--------------------------------------------------------------------------: |
+|         <img src="docs/screenshots/home-hero.png" alt="Hero" width="100%"/>         |   <img src="docs/screenshots/home-about.png" alt="About" width="100%"/>    | <img src="docs/screenshots/home-projects.png" alt="Projects" width="100%"/>  |
+|                          **Hero & Three.js Liquid Canvas**                          |                              **About & Bio**                               |                            **Featured Projects**                             |
+|   <img src="docs/screenshots/home-experience.png" alt="Experience" width="100%"/>   | <img src="docs/screenshots/home-stack.png" alt="Tech Stack" width="100%"/> | <img src="docs/screenshots/home-thoughts.png" alt="Thoughts" width="100%"/>  |
+|                               **Experience Timeline**                               |                            **Tech & AI Stack**                             |                            **Thoughts / Writing**                            |
+| <img src="docs/screenshots/home-testimonials.png" alt="Testimonials" width="100%"/> | <img src="docs/screenshots/home-contact.png" alt="Contact" width="100%"/>  | <img src="docs/screenshots/admin-login.png" alt="Admin login" width="100%"/> |
+|                                  **Testimonials**                                   |                             **Contact / CTA**                              |                               **Admin Login**                                |
 
 ### Mobile Views
 
@@ -46,19 +46,22 @@ A modern, highly immersive personal portfolio featuring an interactive **Three.j
 ## ✨ Key Features & Latest Highlights
 
 ### 🌊 1. Interactive Three.js Liquid Background Canvas
-- **Custom WebGL Shader Waves**: Simulasi kain sutra cair dinamis (*liquid silk*) multi-oktaf yang terinspirasi dari estetika web modern.
+
+- **Custom WebGL Shader Waves**: Simulasi kain sutra cair dinamis (_liquid silk_) multi-oktaf yang terinspirasi dari estetika web modern.
 - **Harmonized Royal Blue Palette**: Warna senada yang diselaraskan dengan palet utama `#005bb2` dan aksen biru royal khas portofolio.
 - **Interactive Pointer Ripples**: Gelombang permukaan merespons gerakan kursor mouse secara organik dengan redaman fisika halus.
 - **Rock-solid Persistence**: Shader loop berjalan stabil 60 FPS tanpa macet saat di-scroll, di-resize, ataupun saat membuka panel inspect element.
 
 ### 🍎 2. Apple-Style Multilingual Welcome Preloader
+
 - **First-Visit Greeting Overlay**: Section loading sapaan yang hanya aktif saat pengunjung pertama kali membuka/me-refresh web.
 - **12+ International Greetings**: Siklus animasi tipografi tulisan tangan ala Apple Hello dalam berbagai aksara dan bahasa dunia:
-  - *Hello* (English), *Halo* (Indonesia), *مرحبًا* (Arabic), *こんにちは* (Japanese), *안녕하세요* (Korean), *你好* (Chinese), *Привет* (Russian), *नमस्ते* (Hindi), *Bonjour* (French), *Hola* (Spanish), *Ciao* (Italian), dsb.
+  - _Hello_ (English), _Halo_ (Indonesia), _مرحبًا_ (Arabic), _こんにちは_ (Japanese), _안녕하세요_ (Korean), _你好_ (Chinese), _Привет_ (Russian), _नमस्ते_ (Hindi), _Bonjour_ (French), _Hola_ (Spanish), _Ciao_ (Italian), dsb.
 - **Seamless Fade-in Transition**: Memudar lembut begitu seluruh asset awal siap untuk menampilkan halaman utama.
 
 ### 🤖 3. Interactive Clover AI Bot Assistant & Thinking Orbs
-- **Clover Bot Avatar with Eye Tracking**: Avatar bot AI interaktif dari [`bot-avatars`](https://libraries.dev/bots) dengan kemampuan pelacakan kursor (*pupil/eye focus*), reaksi sentuh (*click poke*), dan pergantian ekspresi dinamis (*idle*, *working*, *sleeping*).
+
+- **Clover Bot Avatar with Eye Tracking**: Avatar bot AI interaktif dari [`bot-avatars`](https://libraries.dev/bots) dengan kemampuan pelacakan kursor (_pupil/eye focus_), reaksi sentuh (_click poke_), dan pergantian ekspresi dinamis (_idle_, _working_, _sleeping_).
 - **Animated Thinking Orb**: Indikator loading AI berbasi partikel orbit melengkung dari [`thinking-orbs`](https://libraries.dev/orbs).
   - Menggunakan 39 partikel orbit bergerak aktif dengan kontras tinggi (`color="#0284c7"`) dan ukuran dot tajam (`:dot-size="1.8"`).
   - Berpendar harmonis baik di light mode maupun dark mode tanpa efek blank/invisible.
@@ -66,18 +69,21 @@ A modern, highly immersive personal portfolio featuring an interactive **Three.j
 - **Zero-Lag Modal Exit**: Didesain dengan layer akselerasi hardware GPU (`transform-gpu`) dan optimasi per-frame layout throttling sehingga modal tertutup seketika tanpa lag/stutter.
 
 ### 📊 4. Real GitHub Contribution Activity & Breakdown
+
 - **Interactive Heatmap Grid**: Menampilkan 52 minggu grid kontribusi GitHub dengan palet warna gradasi biru (Level 0 s/d Level 4).
 - **Year Selector Switcher**: Filter data aktivitas per tahun (2026 & 2025) secara interaktif.
 - **Live Tooltip & Repository Feed**: Menampilkan statistik commit, tanggal, dan link repo langsung (`Couplecash-Native`, `couplecash`, `Katalog-Web-PPDB-Pesantren`, dll.).
 - **Official Monochrome GitHub SVG**: Terintegrasi menggunakan badge SVG resmi dari [thesvg.org](https://thesvg.org/icon/github?variant=mono) yang diselaraskan dengan tone warna dot biru aktif.
 
 ### 🎯 5. Hero Banner & Infinite Marquee Role Ticker
-- **Signature Motto**: Tagline *"With allfine, everything can will be fine."*
+
+- **Signature Motto**: Tagline _"With allfine, everything can will be fine."_
 - **Dynamic Role Marquee**: Ticker animasi berjalan tanpa henti untuk role keahlian:
-  *Full-Stack Developer · UI/UX Designer · IT Support · Digital Marketing · AI Enthusiast · Web Developer*.
+  _Full-Stack Developer · UI/UX Designer · IT Support · Digital Marketing · AI Enthusiast · Web Developer_.
 - **Scroll Fade Disband**: Efek bubar/luntur tipografi saat halaman mulai di-scroll ke bawah.
 
 ### 🔐 6. Core Portfolio Features & Admin Panel
+
 - **Featured Projects**: Studi kasus proyek mendalam dengan filter stack, live demo, dan rincian arsitektur.
 - **Experience Timeline**: Rekam jejak profesional di PT. Digital Teknologi Perkasa dan sertifikasi industri.
 - **Admin Panel**: Dashboard lengkap untuk mengelola Projects, Tech Stack, Thoughts, Pesan Pengunjung, Log Chat AI, Knowledge Base RAG, dan Keamanan.
@@ -88,19 +94,19 @@ A modern, highly immersive personal portfolio featuring an interactive **Three.j
 
 ## 🛠 Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Framework** | [Nuxt 4](https://nuxt.com) (Universal/SSR) + [Vue 3](https://vuejs.org) + TypeScript |
-| **Graphics & WebGL** | [Three.js](https://threejs.org) (`three` + custom GLSL shader waves) |
-| **AI Bot & Loading Orbs** | [`bot-avatars`](https://libraries.dev/bots) (Clover) + [`thinking-orbs`](https://libraries.dev/orbs) |
-| **Backend & Database** | [Supabase](https://supabase.com) — Postgres, Auth, Storage, `pgvector` |
-| **AI Engine (RAG)** | Google [Gemini API](https://ai.google.dev) (`@google/generative-ai`) |
-| **Styling & Design System** | [Tailwind CSS](https://tailwindcss.com) + Neumorphic Design Tokens |
-| **Animation Engine** | [GSAP](https://gsap.com) + [Lenis](https://github.com/darkroomengineering/lenis) + [Motion](https://motion.dev) (`motion-v`) |
-| **State & Composables** | [Pinia](https://pinia.vuejs.org) + [VueUse](https://vueuse.org) |
-| **Internationalization** | [@nuxtjs/i18n](https://i18n.nuxtjs.org) (ID & EN) |
-| **SEO & Meta** | [@nuxtjs/sitemap](https://sitemap.nuxtjs.org) + [@nuxtjs/robots](https://robots.nuxtjs.org) |
-| **Deployment** | [Vercel](https://vercel.com) (Nitro Engine / Nuxt SSR) |
+| Layer                       | Technology                                                                                                                   |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Framework**               | [Nuxt 4](https://nuxt.com) (Universal/SSR) + [Vue 3](https://vuejs.org) + TypeScript                                         |
+| **Graphics & WebGL**        | [Three.js](https://threejs.org) (`three` + custom GLSL shader waves)                                                         |
+| **AI Bot & Loading Orbs**   | [`bot-avatars`](https://libraries.dev/bots) (Clover) + [`thinking-orbs`](https://libraries.dev/orbs)                         |
+| **Backend & Database**      | [Supabase](https://supabase.com) — Postgres, Auth, Storage, `pgvector`                                                       |
+| **AI Engine (RAG)**         | Google [Gemini API](https://ai.google.dev) (`@google/generative-ai`)                                                         |
+| **Styling & Design System** | [Tailwind CSS](https://tailwindcss.com) + Neumorphic Design Tokens                                                           |
+| **Animation Engine**        | [GSAP](https://gsap.com) + [Lenis](https://github.com/darkroomengineering/lenis) + [Motion](https://motion.dev) (`motion-v`) |
+| **State & Composables**     | [Pinia](https://pinia.vuejs.org) + [VueUse](https://vueuse.org)                                                              |
+| **Internationalization**    | [@nuxtjs/i18n](https://i18n.nuxtjs.org) (ID & EN)                                                                            |
+| **SEO & Meta**              | [@nuxtjs/sitemap](https://sitemap.nuxtjs.org) + [@nuxtjs/robots](https://robots.nuxtjs.org)                                  |
+| **Deployment**              | [Vercel](https://vercel.com) (Nitro Engine / Nuxt SSR)                                                                       |
 
 ---
 
@@ -131,12 +137,12 @@ A modern, highly immersive personal portfolio featuring an interactive **Three.j
 
 **Rendering Strategy** (`nuxt.config.ts` route rules):
 
-| Route | Strategy |
-|---|---|
-| `/` | Full SSR (Universal Render) |
-| `/admin/**` | SPA only (Client-side protected) |
-| `/api/chat` | Nitro Server Route with RAG vector search |
-| `/api/github-contributions` | Nitro Server Route with caching |
+| Route                       | Strategy                                  |
+| --------------------------- | ----------------------------------------- |
+| `/`                         | Full SSR (Universal Render)               |
+| `/admin/**`                 | SPA only (Client-side protected)          |
+| `/api/chat`                 | Nitro Server Route with RAG vector search |
+| `/api/github-contributions` | Nitro Server Route with caching           |
 
 ---
 
@@ -203,13 +209,13 @@ npm run generate
 
 ### Environment Variables
 
-| Variable | Description |
-|---|---|
-| `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_KEY` | Supabase publishable/anon key (client-safe) |
+| Variable                    | Description                                 |
+| --------------------------- | ------------------------------------------- |
+| `SUPABASE_URL`              | Supabase project URL                        |
+| `SUPABASE_KEY`              | Supabase publishable/anon key (client-safe) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (**server-only**) |
-| `GEMINI_API_KEY` | Google Gemini API key (**server-only**) |
-| `NUXT_PUBLIC_SITE_URL` | Public site URL for sitemap/SEO |
+| `GEMINI_API_KEY`            | Google Gemini API key (**server-only**)     |
+| `NUXT_PUBLIC_SITE_URL`      | Public site URL for sitemap/SEO             |
 
 > ⚠️ Jangan pernah mengekspos `SUPABASE_SERVICE_ROLE_KEY` atau `GEMINI_API_KEY` ke sisi klien. Seluruh proses RAG asisten AI dijalankan secara aman melalui Nitro Server Engine.
 

@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
       gemini: Boolean(body?.gemini),
       sort_order: Number(body?.sort_order ?? 0),
       is_active: body?.is_active ?? true,
+      category: String(body?.category ?? 'frontend').trim(),
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)

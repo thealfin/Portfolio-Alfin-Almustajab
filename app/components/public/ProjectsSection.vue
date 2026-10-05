@@ -79,7 +79,7 @@ onBeforeUnmount(() => {
     :transition="{ duration: 0.7 }"
   >
     <div class="flex flex-col gap-3">
-      <SectionHeading :eyebrow="t('featured.title')">
+      <SectionHeading :eyebrow="t('featured.pretitle')">
         {{ t('featured.title') }}
       </SectionHeading>
       <p class="body-lg text-on-surface-variant max-w-2xl">{{ t('projects.subtitle') }}</p>
