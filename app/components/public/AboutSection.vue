@@ -20,7 +20,7 @@ const avatarUrl = computed(() => props.profile?.avatar_url ?? '/alfin-photo.webp
     :transition="{ duration: 0.7 }"
   >
     <motion.div
-      class="neu-raised rounded-card p-6 md:p-8 w-full hover:-translate-y-1 transition-transform duration-500"
+      class="neu-raised rounded-card p-4 sm:p-5 md:p-6 lg:p-7 w-full hover:-translate-y-1 transition-transform duration-500"
       :initial="{ opacity: 0, y: 40 }"
       :while-in-view="{ opacity: 1, y: 0 }"
       :viewport="{ once: true, margin: '-80px' }"
@@ -35,32 +35,36 @@ const avatarUrl = computed(() => props.profile?.avatar_url ?? '/alfin-photo.webp
         <span class="label-caps text-on-surface-variant">{{ t('about.fileLabel') }}</span>
       </div>
 
-      <!-- Profile Avatar Container: Scaled up and flush with bottom border (meper tanpa potongan) -->
-      <div class="relative neu-pressed rounded-[20px] mt-6 md:mt-8 pt-5 px-5 md:pt-7 md:px-7 pb-0 flex items-end justify-center overflow-hidden min-h-[360px] md:min-h-[420px]">
+      <!-- Profile Avatar Container: Scaled down 20% on mobile and aligned with signature on desktop -->
+      <div class="relative neu-pressed rounded-[20px] mt-4 sm:mt-5 md:mt-6 pt-4 px-4 sm:pt-5 sm:px-5 md:pt-6 md:px-6 pb-0 flex items-end justify-center overflow-hidden min-h-[288px] sm:min-h-[310px] md:min-h-[350px] lg:min-h-[330px]">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(0,91,178,0.10),transparent_62%)] pointer-events-none" />
         <img
           :src="avatarUrl"
           :alt="t('about.photoAlt')"
-          class="relative z-10 w-full max-w-[340px] md:max-w-[380px] h-auto object-cover object-bottom scale-110 sm:scale-115 md:scale-120 origin-bottom mix-blend-normal drop-shadow-[0_20px_32px_rgba(17,28,44,0.25)] block align-bottom -mb-0.5"
+          class="relative z-10 w-full max-w-[272px] sm:max-w-[290px] md:max-w-[325px] lg:max-w-[310px] h-auto object-cover object-bottom scale-110 sm:scale-115 md:scale-120 origin-bottom mix-blend-normal drop-shadow-[0_20px_32px_rgba(17,28,44,0.25)] block align-bottom -mb-0.5"
         />
       </div>
 
-      <div class="my-6 md:my-8 h-px bg-gradient-to-r from-transparent via-outline-variant/70 to-transparent" />
+      <div class="my-4 sm:my-5 md:my-5 h-px bg-gradient-to-r from-transparent via-outline-variant/70 to-transparent" />
 
-      <div class="flex items-end justify-between gap-4 flex-wrap">
-        <div>
-          <p class="headline-lg text-on-surface">{{ fullName }}</p>
-          <div class="title-md text-on-surface-variant mt-1 flex items-center gap-1.5 flex-wrap">
-            <span>Specialized as</span>
-            <RoleSwitcher custom-class="text-primary font-bold" />
+      <!-- Profile Meta & Status Badge: Two-row Anti-Shift Architecture -->
+      <div class="flex flex-col gap-2.5">
+        <!-- Row 1: Full Name and Available Status Badge (Clean top alignment across mobile & desktop) -->
+        <div class="flex items-center justify-between gap-3">
+          <p class="headline-md sm:headline-lg text-on-surface font-bold">{{ fullName }}</p>
+          <div class="neu-island rounded-full px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-2 shrink-0">
+            <span class="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span class="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-green-500" />
+            </span>
+            <span class="label-caps text-on-surface-variant text-[10px] sm:text-xs">{{ t('about.available') }}</span>
           </div>
         </div>
-        <div class="neu-island rounded-full px-4 py-2 flex items-center gap-2">
-          <span class="relative flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
-          </span>
-          <span class="label-caps text-on-surface-variant">{{ t('about.available') }}</span>
+
+        <!-- Row 2: Specialized as [RoleSwitcher] (Full width space, zero line wrap, zero CLS) -->
+        <div class="title-sm sm:title-md text-on-surface-variant flex items-center gap-1.5 flex-nowrap whitespace-nowrap overflow-visible min-h-[1.75rem]">
+          <span class="shrink-0">Specialized as</span>
+          <RoleSwitcher custom-class="text-primary font-bold" />
         </div>
       </div>
     </motion.div>

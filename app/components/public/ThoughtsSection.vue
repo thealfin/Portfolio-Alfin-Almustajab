@@ -8,17 +8,27 @@ const { t, locale } = useI18n()
 
 const all = computed(() => props.thoughts ?? [])
 const activeCategory = ref('all')
-const reader = ref<any>(null)
-const readerLoading = ref(false)
-const readerOpen = ref(false)
 
-const categories = computed(() => {
+// 2-Button Filter System State
+const dropdownOpen = ref(false)
+const dropdownRef = ref<HTMLElement | null>(null)
+
+onClickOutside(dropdownRef, () => {
+  dropdownOpen.value = false
+})
+
+const categoryList = computed(() => {
   const set = new Set<string>()
-  for (const th of all.value) for (const c of (th.category ?? [])) set.add(c)
-  return [
-    { label: t('thoughts.all'), value: 'all' },
-    ...[...set].sort().map((c) => ({ label: c, value: c })),
-  ]
+  for (const th of all.value) {
+    for (const c of (th.category ?? [])) {
+      if (c) set.add(c)
+    }
+  }
+  return Array.from(set).sort().map((c) => ({
+    label: c,
+    value: c,
+    count: all.value.filter((th) => (th.category ?? []).includes(c)).length,
+  }))
 })
 
 const filtered = computed(() => {
@@ -27,6 +37,7 @@ const filtered = computed(() => {
 })
 
 const formatDate = (iso: string) => {
+  if (!iso) return ''
   const d = new Date(iso)
   return new Intl.DateTimeFormat(locale.value === 'en' ? 'en-US' : 'id-ID', {
     month: 'short',
@@ -34,36 +45,14 @@ const formatDate = (iso: string) => {
   }).format(d)
 }
 
-const openReader = async (th: any) => {
-  readerLoading.value = true
-  readerOpen.value = true
-  document.body.style.overflow = 'hidden'
-  try {
-    const { api } = useApi()
-    const { data } = await api.get(`/thoughts/${th.slug}`)
-    reader.value = data
-  } catch {
-    reader.value = th
-  } finally {
-    readerLoading.value = false
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && dropdownOpen.value) {
+    dropdownOpen.value = false
   }
 }
 
-const closeReader = () => {
-  readerOpen.value = false
-  reader.value = null
-  document.body.style.overflow = ''
-}
-
-const onKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && readerOpen.value) closeReader()
-}
-
 onMounted(() => document.addEventListener('keydown', onKeydown))
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', onKeydown)
-  document.body.style.overflow = ''
-})
+onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
@@ -82,17 +71,83 @@ onBeforeUnmount(() => {
       <p class="body-lg text-on-surface-variant max-w-2xl">{{ t('thoughts.subtitle') }}</p>
     </div>
 
-    <div class="flex flex-wrap gap-3" role="tablist">
+    <!-- 2-Button Filter System (Public Monolog) -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <!-- Button 1: Semua (All) -->
       <button
-        v-for="c in categories"
-        :key="c.value"
-        :aria-selected="activeCategory === c.value"
-        class="px-5 py-2.5 rounded-full body-md transition-all"
-        :class="activeCategory === c.value ? 'neu-pressed text-primary font-bold' : 'neu-raised text-on-surface-variant hover:text-on-surface hover:scale-105 active:scale-95'"
-        @click="activeCategory = c.value"
+        type="button"
+        class="px-5 py-2.5 rounded-full body-md transition-all duration-300 flex items-center gap-2.5 cursor-pointer"
+        :class="activeCategory === 'all'
+          ? 'neu-pressed text-primary font-bold shadow-inner'
+          : 'neu-raised text-on-surface-variant hover:text-on-surface hover:scale-105 active:scale-95'"
+        @click="activeCategory === 'all'; dropdownOpen = false"
       >
-        {{ c.label }}
+        <span>{{ t('thoughts.all') }}</span>
+        <span
+          class="neu-pressed px-2 py-0.5 rounded-full text-[11px] font-bold"
+          :class="activeCategory === 'all' ? 'text-primary' : 'text-on-surface-variant'"
+        >
+          {{ all.length }}
+        </span>
       </button>
+
+      <!-- Button 2: Option Dropdown Filter Tag -->
+      <div ref="dropdownRef" class="relative">
+        <button
+          type="button"
+          class="px-5 py-2.5 rounded-full body-md transition-all duration-300 flex items-center gap-2.5 cursor-pointer"
+          :class="activeCategory !== 'all'
+            ? 'neu-pressed text-primary font-bold shadow-inner'
+            : 'neu-raised text-on-surface-variant hover:text-on-surface hover:scale-105 active:scale-95'"
+          @click="dropdownOpen = !dropdownOpen"
+        >
+          <Icon name="ph:funnel-bold" class="text-base" />
+          <span v-if="activeCategory === 'all'">Filter Kategori</span>
+          <span v-else class="flex items-center gap-1.5 font-bold">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span>{{ activeCategory }}</span>
+          </span>
+          <Icon
+            name="ph:caret-down-bold"
+            class="text-xs transition-transform duration-300"
+            :class="dropdownOpen ? 'rotate-180' : ''"
+          />
+        </button>
+
+        <!-- Floating Dropdown Popover -->
+        <Transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="opacity-0 translate-y-2 scale-95"
+          enter-to-class="opacity-100 translate-y-0 scale-100"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="opacity-100 translate-y-0 scale-100"
+          leave-to-class="opacity-0 translate-y-2 scale-95"
+        >
+          <div
+            v-if="dropdownOpen"
+            class="absolute left-0 mt-2 w-64 max-h-72 overflow-y-auto neu-island bg-surface-card rounded-2xl p-2 shadow-2xl border border-outline-variant/30 flex flex-col gap-1 z-50 backdrop-blur-xl"
+          >
+            <button
+              v-for="cat in categoryList"
+              :key="cat.value"
+              type="button"
+              class="w-full px-3.5 py-2 rounded-xl text-left body-sm flex items-center justify-between transition-all duration-200 cursor-pointer"
+              :class="activeCategory === cat.value
+                ? 'neu-pressed text-primary font-bold'
+                : 'hover:neu-pressed text-on-surface-variant hover:text-on-surface'"
+              @click="activeCategory = cat.value; dropdownOpen = false"
+            >
+              <span class="truncate">{{ cat.label }}</span>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="neu-pressed px-2 py-0.5 rounded-full text-[10px] font-bold text-on-surface-variant">
+                  {{ cat.count }}
+                </span>
+                <Icon v-if="activeCategory === cat.value" name="ph:check-bold" class="text-xs text-primary" />
+              </div>
+            </button>
+          </div>
+        </Transition>
+      </div>
     </div>
 
     <div v-if="!filtered.length" class="neu-raised rounded-card p-10 text-center">
@@ -100,11 +155,11 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-else class="flex flex-col gap-5">
-      <button
+      <NuxtLink
         v-for="th in filtered"
         :key="th.slug"
+        :to="'/thoughts/' + th.slug"
         class="group w-full text-left neu-raised rounded-card p-6 md:p-7 flex flex-col gap-3 hover:scale-[1.01] transition-transform duration-300 cursor-pointer"
-        @click="openReader(th)"
       >
         <div class="flex flex-wrap items-center gap-3">
           <span
@@ -120,6 +175,11 @@ onBeforeUnmount(() => {
           </span>
           <span class="w-1 h-1 rounded-full bg-on-surface-variant/40" />
           <span class="label-caps text-on-surface-variant text-[11px]">{{ formatDate(th.created_at) }}</span>
+          <span class="w-1 h-1 rounded-full bg-on-surface-variant/40" />
+          <span class="label-caps text-on-surface-variant text-[11px] flex items-center gap-1">
+            <Icon name="ph:eye-bold" class="text-xs" />
+            {{ t('thoughts.views', { n: th.views_count ?? 0 }) }}
+          </span>
         </div>
         <h3 class="headline-lg text-on-surface group-hover:text-primary transition-colors leading-snug">
           {{ locale === 'en' ? th.title_en || th.title_id : th.title_id }}
@@ -130,85 +190,7 @@ onBeforeUnmount(() => {
             <Icon name="ph:arrow-right-bold" class="text-lg group-hover:translate-x-1 transition-transform" />
           </span>
         </div>
-      </button>
+      </NuxtLink>
     </div>
   </motion.section>
-
-  <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-300 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-200 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div v-if="readerOpen" class="fixed inset-0 z-[120]" role="dialog" aria-modal="true">
-        <div class="absolute inset-0 bg-surface-base/70 backdrop-blur-xl backdrop-saturate-150" @click="closeReader" />
-
-        <div class="absolute inset-[20px] neu-raised rounded-[20px] overflow-hidden flex flex-col bg-surface-card">
-          <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-outline-variant/50 bg-surface-card shrink-0">
-            <div class="flex items-center gap-3 min-w-0">
-              <button
-                class="w-10 h-10 rounded-full neu-pressed flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors shrink-0"
-                :aria-label="t('thoughts.back')"
-                @click="closeReader"
-              >
-                <Icon name="ph:x-bold" class="text-xl" />
-              </button>
-              <h2 class="title-md text-on-surface truncate">{{ reader?.title_id ?? '' }}</h2>
-            </div>
-          </div>
-
-          <div class="flex-1 min-h-0 overflow-y-auto">
-            <div v-if="readerLoading" class="p-8 max-w-4xl mx-auto flex flex-col gap-6">
-              <div class="neu-raised rounded-card p-6 h-14 animate-pulse" />
-              <div v-for="i in 6" :key="i" class="neu-raised rounded-card p-6 h-16 animate-pulse" />
-            </div>
-
-            <article v-else-if="reader" class="w-full max-w-4xl mx-auto flex flex-col gap-6 px-6 md:px-10 py-10 pb-20">
-              <div class="flex flex-col gap-4">
-                <div class="flex flex-wrap items-center gap-3">
-                  <span
-                    v-for="cat in (reader.category ?? [])"
-                    :key="cat"
-                    class="px-3 py-1 rounded-full neu-pressed label-caps text-primary text-[10px]"
-                  >
-                    {{ cat }}
-                  </span>
-                  <span class="w-1 h-1 rounded-full bg-on-surface-variant/40" />
-                  <span class="label-caps text-on-surface-variant text-[11px]">
-                    {{ t('thoughts.readTime', { n: reader.read_time_minutes ?? 1 }) }}
-                  </span>
-                  <span class="w-1 h-1 rounded-full bg-on-surface-variant/40" />
-                  <span class="label-caps text-on-surface-variant text-[11px]">{{ formatDate(reader.created_at) }}</span>
-                  <span class="w-1 h-1 rounded-full bg-on-surface-variant/40" />
-                  <span class="label-caps text-on-surface-variant text-[11px] flex items-center gap-1">
-                    <Icon name="ph:eye-bold" class="text-xs" />
-                    {{ t('thoughts.views', { n: reader.views_count ?? 0 }) }}
-                  </span>
-                </div>
-                <h1 class="display-lg text-on-surface leading-tight">
-                  {{ locale === 'en' ? reader.title_en || reader.title_id : reader.title_id }}
-                </h1>
-              </div>
-
-              <div v-if="reader.cover_image_url" class="w-full h-[280px] md:h-[380px] neu-raised rounded-card p-3 overflow-hidden">
-                <img
-                  :src="reader.cover_image_url"
-                  :alt="reader.image_alt_text ?? reader.title_id"
-                  loading="lazy"
-                  class="w-full h-full rounded-[14px] object-cover"
-                />
-              </div>
-
-              <div
-                class="body-lg text-on-surface leading-relaxed whitespace-pre-line"
-              >{{ locale === 'en' ? reader.content_en || reader.content_id : reader.content_id }}</div>
-            </article>
-          </div>
-        </div>
-      </div>
-    </Transition>
-  </Teleport>
 </template>

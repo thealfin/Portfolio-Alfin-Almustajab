@@ -63,6 +63,11 @@ export default defineNuxtConfig({
     '/': { isr: false },
     '/admin/**': { ssr: false },
     '/api/chat': { cors: true },
+    '/api/projects': { headers: { 'cache-control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600' } },
+    '/api/projects/**': { headers: { 'cache-control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600' } },
+    '/api/thoughts': { headers: { 'cache-control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600' } },
+    '/api/thoughts/**': { headers: { 'cache-control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600' } },
+    '/api/stacks': { headers: { 'cache-control': 'public, max-age=300, s-maxage=600, stale-while-revalidate=1200' } },
   },
 
   runtimeConfig: {
@@ -92,6 +97,7 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'icon', type: 'image/webp', href: '/favicon.webp' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200' },
       ],
     },
   },

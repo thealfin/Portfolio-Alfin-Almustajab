@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getTechIcon } from '~/utils/techIcons'
+
 const props = defineProps<{
   project?: any
 }>()
@@ -8,12 +10,101 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-const { createProject, updateProject } = useAdmin()
+const { createProject, updateProject, listStacks } = useAdmin()
 
 const { t } = useI18n()
 
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+// Initial selected stacks
+const selectedStacks = ref<string[]>(
+  Array.isArray(props.project?.tech_stack)
+    ? [...props.project.tech_stack]
+    : typeof props.project?.tech_stack === 'string'
+      ? props.project.tech_stack.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : []
+)
+
+// Master tech stack data from /admin/stacks
+const masterStacks = ref<any[]>([])
+const loadingStacks = ref(false)
+const stackSearch = ref('')
+const stackCategoryFilter = ref('all')
+const customStackInput = ref('')
+
+const fetchMasterStacks = async () => {
+  loadingStacks.value = true
+  try {
+    const { data } = await listStacks()
+    masterStacks.value = data || []
+  } catch (e) {
+    console.error('Failed to load master stacks:', e)
+  } finally {
+    loadingStacks.value = false
+  }
+}
+
+const masterStackMap = computed(() => {
+  const map = new Map<string, any>()
+  for (const s of masterStacks.value) {
+    if (s?.name) map.set(s.name.toLowerCase().trim(), s)
+  }
+  return map
+})
+
+const getMasterStack = (name: string) => {
+  if (!name) return null
+  return masterStackMap.value.get(name.toLowerCase().trim()) ?? null
+}
+
+const isStackSelected = (name: string) => {
+  if (!name) return false
+  const target = name.toLowerCase().trim()
+  return selectedStacks.value.some((s) => s.toLowerCase().trim() === target)
+}
+
+const toggleStack = (name: string) => {
+  const trimmed = name.trim()
+  if (!trimmed) return
+  const target = trimmed.toLowerCase()
+  const idx = selectedStacks.value.findIndex((s) => s.toLowerCase().trim() === target)
+  if (idx !== -1) {
+    selectedStacks.value.splice(idx, 1)
+  } else {
+    selectedStacks.value.push(trimmed)
+  }
+}
+
+const removeStack = (idx: number) => {
+  selectedStacks.value.splice(idx, 1)
+}
+
+const addCustomStack = () => {
+  const val = customStackInput.value.trim()
+  if (!val) return
+  const items = val.split(',').map((s) => s.trim()).filter(Boolean)
+  for (const item of items) {
+    const target = item.toLowerCase()
+    if (!selectedStacks.value.some((s) => s.toLowerCase().trim() === target)) {
+      selectedStacks.value.push(item)
+    }
+  }
+  customStackInput.value = ''
+}
+
+const filteredMasterStacks = computed(() => {
+  const q = stackSearch.value.trim().toLowerCase()
+  return masterStacks.value.filter((s) => {
+    const matchSearch = !q || s.name?.toLowerCase().includes(q)
+    const matchCat = stackCategoryFilter.value === 'all' || (s.category || 'frontend') === stackCategoryFilter.value
+    return matchSearch && matchCat
+  })
+})
+
+onMounted(() => {
+  fetchMasterStacks()
+})
 
 const form = reactive({
   title: props.project?.title ?? '',
@@ -29,7 +120,6 @@ const form = reactive({
   challenge_en: props.project?.challenge_en ?? '',
   result_id: props.project?.result_id ?? '',
   result_en: props.project?.result_en ?? '',
-  tech_stack: (props.project?.tech_stack ?? []).join(', '),
   live_url: props.project?.live_url ?? '',
   repo_url: props.project?.repo_url ?? '',
   cover_image_url: props.project?.cover_image_url ?? '',
@@ -78,7 +168,7 @@ const submit = async () => {
     challenge_en: form.challenge_en,
     result_id: form.result_id,
     result_en: form.result_en,
-    tech_stack: form.tech_stack.split(',').map((s: string) => s.trim()).filter(Boolean),
+    tech_stack: selectedStacks.value,
     live_url: form.live_url,
     repo_url: form.repo_url,
     cover_image_url: normalizeMediaUrl(form.cover_image_url),
@@ -106,7 +196,7 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="neu-raised rounded-[24px] p-5 w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col gap-4">
+  <div class="neu-raised rounded-[24px] p-5 w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col gap-4">
     <div class="flex items-center justify-between">
       <h2 class="headline-lg text-on-surface">{{ project ? t('admin.editProject') : t('admin.addProject') }}</h2>
       <button class="w-9 h-9 rounded-full neu-raised flex items-center justify-center text-on-surface-variant hover:text-on-surface" @click="emit('cancel')">
@@ -126,10 +216,10 @@ const submit = async () => {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="label-caps text-on-surface-variant ml-4">Client / Klien</label>
-          <input v-model="form.client" placeholder="PT. Digital Teknologi Perkasa" class="neu-pressed rounded-full px-5 py-2.5 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary" />
+          <input v-model="form.client" placeholder="PT. Digital Perkasa" class="neu-pressed rounded-full px-5 py-2.5 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.status') }}</label>
@@ -142,6 +232,10 @@ const submit = async () => {
             <option value="On Hold">On Hold</option>
             <option value="Archived">Archived</option>
           </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.year') }}</label>
+          <input v-model.number="form.year" type="number" class="neu-pressed rounded-full px-5 py-2.5 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
       </div>
 
@@ -181,6 +275,9 @@ const submit = async () => {
           <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.challenge') }} (EN)</label>
           <textarea v-model="form.challenge_en" rows="2" class="neu-pressed rounded-[16px] px-5 py-3 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary resize-none" />
         </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex flex-col gap-1.5">
           <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.result') }} (ID)</label>
           <textarea v-model="form.result_id" rows="2" class="neu-pressed rounded-[16px] px-5 py-3 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary resize-none" />
@@ -191,14 +288,165 @@ const submit = async () => {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.techStack') }}</label>
-          <input v-model="form.tech_stack" placeholder="Vue, Nuxt, Tailwind" class="neu-pressed rounded-full px-5 py-2.5 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary" />
+      <!-- INTERACTIVE TECH STACK SELECTOR (CONNECTED DIRECTLY TO ADMIN TECH STACK SECTION) -->
+      <div class="flex flex-col gap-3 neu-raised rounded-[20px] p-4 sm:p-5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <Icon name="ph:cpu-bold" class="text-primary text-lg" />
+            <span class="body-md font-bold text-on-surface">{{ t('admin.techStack') }}</span>
+            <span class="neu-pressed px-2.5 py-0.5 rounded-full text-[10px] font-bold text-primary">
+              {{ selectedStacks.length }} Terpilih
+            </span>
+          </div>
+          <NuxtLink
+            to="/admin/stacks"
+            target="_blank"
+            class="text-[11px] text-primary hover:underline flex items-center gap-1 font-semibold"
+            title="Buka menu Tech Stack untuk menambah atau mengubah ikon master"
+          >
+            <span>Master Tech Stack</span>
+            <Icon name="ph:arrow-square-out-bold" class="text-xs" />
+          </NuxtLink>
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.year') }}</label>
-          <input v-model.number="form.year" type="number" class="neu-pressed rounded-full px-5 py-2.5 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary" />
+
+        <!-- Selected Stack Badges Row -->
+        <div class="flex flex-wrap items-center gap-2 min-h-[44px] p-2.5 neu-pressed rounded-[16px]">
+          <div
+            v-for="(tech, idx) in selectedStacks"
+            :key="tech"
+            class="group/item neu-raised px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-bold text-on-surface hover:text-primary transition-all duration-200"
+          >
+            <!-- Icon Preview -->
+            <img
+              v-if="getMasterStack(tech)?.icon_url"
+              :src="getMasterStack(tech).icon_url"
+              :alt="tech"
+              class="w-4 h-4 object-contain"
+              loading="lazy"
+            />
+            <GeminiIcon
+              v-else-if="getMasterStack(tech)?.gemini"
+              class="w-4 h-4 text-sky-500"
+            />
+            <Icon
+              v-else
+              :name="getTechIcon(tech)"
+              class="text-base text-primary"
+            />
+            <span>{{ tech }}</span>
+            <button
+              type="button"
+              class="w-4 h-4 rounded-full flex items-center justify-center hover:bg-error/20 hover:text-error transition-colors"
+              :title="'Hapus ' + tech"
+              @click.stop="removeStack(idx)"
+            >
+              <Icon name="ph:x-bold" class="text-[10px]" />
+            </button>
+          </div>
+
+          <span v-if="!selectedStacks.length" class="text-xs text-on-surface-variant/60 italic pl-1">
+            Belum ada tech stack yang dipilih. Klik dari daftar di bawah atau ketik manual.
+          </span>
+        </div>
+
+        <!-- Master Stacks Picker Matrix -->
+        <div class="flex flex-col gap-2 pt-1 border-t border-outline-variant/30">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            <!-- Search input inside master stacks -->
+            <div class="neu-pressed rounded-full flex items-center px-3 py-1.5 gap-2 flex-1 max-w-xs">
+              <Icon name="ph:magnifying-glass-bold" class="text-on-surface-variant text-xs" />
+              <input
+                v-model="stackSearch"
+                type="text"
+                placeholder="Cari tech stack..."
+                class="bg-transparent w-full outline-none text-xs text-on-surface placeholder:text-on-surface-variant/50"
+              />
+              <button v-if="stackSearch" type="button" @click="stackSearch = ''">
+                <Icon name="ph:x-bold" class="text-xs text-on-surface-variant" />
+              </button>
+            </div>
+
+            <!-- Category filter chips -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+              <button
+                v-for="cat in [
+                  { id: 'all', label: 'Semua' },
+                  { id: 'frontend', label: 'Frontend' },
+                  { id: 'backend', label: 'Backend' },
+                  { id: 'devops', label: 'DevOps' },
+                  { id: 'rag', label: 'RAG' },
+                  { id: 'llm', label: 'LLM' },
+                ]"
+                :key="cat.id"
+                type="button"
+                class="px-2.5 py-1 rounded-full font-semibold transition-all select-none whitespace-nowrap"
+                :class="stackCategoryFilter === cat.id ? 'neu-pressed text-primary font-bold' : 'neu-raised text-on-surface-variant hover:text-on-surface'"
+                @click="stackCategoryFilter = cat.id"
+              >
+                {{ cat.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Clickable Master Stack Badges -->
+          <div class="max-h-40 overflow-y-auto p-2 neu-pressed rounded-[16px] flex flex-wrap gap-1.5">
+            <button
+              v-for="s in filteredMasterStacks"
+              :key="s.id || s.name"
+              type="button"
+              class="px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 select-none cursor-pointer"
+              :class="isStackSelected(s.name) ? 'neu-accent font-bold shadow-sm' : 'neu-raised text-on-surface-variant hover:text-on-surface'"
+              @click="toggleStack(s.name)"
+            >
+              <img
+                v-if="s.icon_url"
+                :src="s.icon_url"
+                :alt="s.name"
+                class="w-3.5 h-3.5 object-contain"
+                loading="lazy"
+              />
+              <GeminiIcon
+                v-else-if="s.gemini"
+                class="w-3.5 h-3.5"
+                :class="isStackSelected(s.name) ? 'text-white' : 'text-sky-500'"
+              />
+              <Icon
+                v-else
+                :name="getTechIcon(s.name)"
+                class="text-sm"
+              />
+              <span>{{ s.name }}</span>
+              <Icon v-if="isStackSelected(s.name)" name="ph:check-bold" class="text-[10px] ml-0.5" />
+            </button>
+
+            <span v-if="!filteredMasterStacks.length && !loadingStacks" class="text-xs text-on-surface-variant p-2 italic w-full text-center">
+              Tidak ada tech stack yang cocok dengan "{{ stackSearch }}"
+            </span>
+            <span v-if="loadingStacks" class="text-xs text-on-surface-variant p-2 italic w-full text-center">
+              Memuat master tech stack...
+            </span>
+          </div>
+
+          <!-- Manual input for custom technology -->
+          <div class="flex items-center gap-2 pt-1">
+            <div class="flex-1 neu-pressed rounded-full flex items-center px-4 py-2 gap-2">
+              <Icon name="ph:plus-circle-bold" class="text-on-surface-variant text-sm" />
+              <input
+                v-model="customStackInput"
+                type="text"
+                placeholder="Ketik nama stack custom lalu tekan Enter atau Tambah..."
+                class="bg-transparent w-full outline-none body-sm text-on-surface placeholder:text-on-surface-variant/50"
+                @keydown.enter.prevent="addCustomStack"
+              />
+            </div>
+            <button
+              type="button"
+              class="neu-raised px-4 py-2 rounded-full body-sm font-bold text-primary hover:neu-pressed transition-all shrink-0"
+              @click="addCustomStack"
+            >
+              Tambah
+            </button>
+          </div>
         </div>
       </div>
 
@@ -238,98 +486,89 @@ const submit = async () => {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <Icon name="ph:images-bold" class="text-primary text-lg" />
-            <span class="label-caps text-on-surface-variant uppercase tracking-wider">{{ t('admin.mediaGallery') }}</span>
+            <span class="body-md font-bold text-on-surface">{{ t('admin.mediaGallery') }}</span>
+            <span class="neu-pressed px-2.5 py-0.5 rounded-full text-[10px] font-bold text-on-surface-variant">
+              {{ media.length }} Item
+            </span>
           </div>
           <button
             type="button"
-            class="neu-raised rounded-full px-3.5 py-1.5 flex items-center gap-1.5 text-primary text-[12px] font-bold hover:neu-pressed transition-all"
+            class="neu-raised px-4 py-1.5 rounded-full text-xs font-bold text-primary flex items-center gap-1.5 hover:neu-pressed transition-all"
             @click="addMedia"
           >
-            <Icon name="ph:plus-bold" class="text-sm" />
+            <Icon name="ph:plus-bold" class="text-xs" />
             {{ t('admin.addMedia') }}
           </button>
         </div>
-        <p class="text-[11px] text-on-surface-variant ml-1">{{ t('admin.mediaGalleryHint') }}</p>
 
         <div v-if="media.length" class="flex flex-col gap-3">
           <div
             v-for="(m, i) in media"
             :key="i"
-            class="neu-pressed rounded-[16px] p-3 flex flex-col sm:flex-row sm:items-center gap-3"
+            class="neu-pressed rounded-[18px] p-3.5 flex flex-col sm:flex-row gap-3 items-start sm:items-center"
           >
-            <div class="flex items-center justify-center w-16 h-16 rounded-[12px] overflow-hidden neu-raised shrink-0">
+            <div class="w-16 h-16 rounded-xl neu-raised overflow-hidden shrink-0 flex items-center justify-center bg-surface-container">
               <img
                 v-if="m.image_url"
                 :src="normalizeMediaUrl(m.image_url)"
-                :alt="m.caption || `media-${i + 1}`"
                 class="w-full h-full object-cover"
                 loading="lazy"
+                @error="($event.target as HTMLElement).style.display = 'none'"
               />
-              <Icon v-else name="ph:image-bold" class="text-2xl text-outline/50" />
+              <Icon v-else name="ph:image-bold" class="text-on-surface-variant text-xl" />
             </div>
-            <div class="flex flex-col gap-2 flex-1 min-w-0">
+            <div class="flex-1 flex flex-col gap-2 w-full">
               <input
                 v-model="m.image_url"
-                type="url"
-                class="w-full bg-transparent body-md text-on-surface outline-none placeholder:text-on-surface-variant/50 text-[13px]"
-                :placeholder="t('admin.mediaImageUrl')"
+                placeholder="https://lh3.googleusercontent.com/d/..."
+                class="neu-raised rounded-full px-4 py-1.5 text-xs bg-transparent focus:outline-none focus:ring-1 focus:ring-primary w-full"
                 @blur="m.image_url = normalizeMediaUrl(m.image_url)"
               />
-              <div class="flex items-center gap-2">
-                <input
-                  v-model="m.caption"
-                  type="text"
-                  class="w-full bg-transparent body-md text-on-surface-variant outline-none placeholder:text-on-surface-variant/40 text-[12px]"
-                  :placeholder="t('admin.mediaCaption')"
-                />
-                <input
-                  v-model.number="m.sort_order"
-                  type="number"
-                  class="w-14 bg-transparent body-md text-on-surface outline-none text-center text-[12px]"
-                  :title="t('admin.sortOrder')"
-                />
-                <button
-                  type="button"
-                  class="w-8 h-8 rounded-full neu-raised flex items-center justify-center text-on-surface-variant hover:text-error transition-colors shrink-0"
-                  :aria-label="t('admin.removeMedia')"
-                  @click="removeMedia(i)"
-                >
-                  <Icon name="ph:x-bold" class="text-sm" />
-                </button>
-              </div>
+              <input
+                v-model="m.caption"
+                placeholder="Caption gambar..."
+                class="neu-raised rounded-full px-4 py-1.5 text-xs bg-transparent focus:outline-none focus:ring-1 focus:ring-primary w-full"
+              />
             </div>
+            <button
+              type="button"
+              class="w-8 h-8 rounded-full neu-raised flex items-center justify-center text-error hover:neu-pressed shrink-0 self-end sm:self-center"
+              @click="removeMedia(i)"
+            >
+              <Icon name="ph:trash-bold" class="text-sm" />
+            </button>
           </div>
-        </div>
-
-        <div v-else class="border-2 border-dashed border-outline-variant/40 rounded-[16px] p-4 flex items-center justify-center gap-2 text-on-surface-variant text-[13px]">
-          <Icon name="ph:images-bold" class="text-outline" />
-          {{ t('admin.mediaEmpty') }}
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <label class="flex items-center gap-3 neu-pressed rounded-full px-5 py-2.5 cursor-pointer">
-          <input v-model="form.is_featured" type="checkbox" class="accent-[#005bb2]" />
-          <span class="body-md text-on-surface">{{ t('admin.isFeatured') }}</span>
-        </label>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex items-center gap-3">
+          <input id="is_featured" v-model="form.is_featured" type="checkbox" class="w-4 h-4 accent-primary" />
+          <label for="is_featured" class="body-md text-on-surface cursor-pointer select-none">{{ t('admin.featured') }}</label>
+        </div>
         <div class="flex flex-col gap-1.5">
           <label class="label-caps text-on-surface-variant ml-4">{{ t('admin.sortOrder') }}</label>
           <input v-model.number="form.sort_order" type="number" class="neu-pressed rounded-full px-5 py-2.5 body-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
       </div>
 
-      <p v-if="error" class="body-md text-error">{{ error }}</p>
+      <p v-if="error" class="body-sm text-error font-medium px-4">{{ error }}</p>
 
-      <div class="flex gap-3 mt-1">
-        <button type="button" class="flex-1 neu-raised py-3 rounded-full text-on-surface-variant font-bold hover:neu-pressed transition-all" @click="emit('cancel')">
+      <div class="flex justify-end gap-3 pt-2">
+        <button
+          type="button"
+          class="neu-raised px-6 py-2.5 rounded-full body-md font-bold text-on-surface-variant hover:text-on-surface transition-all"
+          @click="emit('cancel')"
+        >
           {{ t('admin.cancel') }}
         </button>
         <button
           type="submit"
           :disabled="loading"
-          class="flex-1 neu-accent py-3 rounded-full flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-70"
+          class="neu-accent px-6 py-2.5 rounded-full body-md font-bold disabled:opacity-50 transition-all flex items-center gap-2"
         >
-          <span class="body-lg font-bold">{{ loading ? '...' : t('admin.save') }}</span>
+          <Icon v-if="loading" name="ph:spinner-gap-bold" class="animate-spin text-base" />
+          <span>{{ loading ? t('admin.saving') : t('admin.save') }}</span>
         </button>
       </div>
     </form>

@@ -34,6 +34,7 @@ export function useAdmin() {
   const createThought = (t: any) => call('post', '/admin/thoughts', t)
   const updateThought = (id: string, t: any) => call('patch', `/admin/thoughts/${id}`, t)
   const deleteThought = (id: string) => call('delete', `/admin/thoughts/${id}`)
+  const translateThought = (payload: { title_id: string; content_id: string }) => call('post', '/admin/thoughts/translate', payload)
   const listStacks = () => call('get', '/admin/stacks')
   const createStack = (s: any) => call('post', '/admin/stacks', s)
   const updateStack = (id: string, s: any) => call('patch', `/admin/stacks/${id}`, s)
@@ -43,5 +44,6 @@ export function useAdmin() {
   const updateTestimonial = (id: string, t: any) => call('patch', `/admin/testimonials/${id}`, t)
   const deleteTestimonial = (id: string) => call('delete', `/admin/testimonials/${id}`)
 
-  return { call, stats, activity, analytics, listProjects, createProject, updateProject, deleteProject, chatLogs, listKnowledge, createKnowledge, updateKnowledge, deleteKnowledge, getAiSettings, updateAiSettings, listMessages, updateMessage, deleteMessage, archiveChatLog, getSecurity, changePassword, listThoughts, createThought, updateThought, deleteThought, listStacks, createStack, updateStack, deleteStack, listTestimonials, createTestimonial, updateTestimonial, deleteTestimonial }
+  return { call, stats, activity, analytics, listProjects, createProject, updateProject, deleteProject, chatLogs, listKnowledge, createKnowledge, updateKnowledge, deleteKnowledge, getAiSettings, updateAiSettings, listMessages, updateMessage, deleteMessage, archiveChatLog, getSecurity, changePassword, listThoughts, createThought, updateThought, deleteThought, translateThought, listStacks, createStack, updateStack, deleteStack, listTestimonials, createTestimonial, updateTestimonial, deleteTestimonial }
 }
+

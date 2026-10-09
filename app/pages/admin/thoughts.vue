@@ -27,7 +27,38 @@ const fetchThoughts = async () => {
   }
 }
 
-onMounted(fetchThoughts)
+// 2-Button Filter System State
+const dropdownOpen = ref(false)
+const dropdownRef = ref<HTMLElement | null>(null)
+
+onClickOutside(dropdownRef, () => {
+  dropdownOpen.value = false
+})
+
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && dropdownOpen.value) {
+    dropdownOpen.value = false
+  }
+}
+
+watch(showForm, (v) => {
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = v ? 'hidden' : ''
+  }
+})
+
+onMounted(() => {
+  fetchThoughts()
+  document.addEventListener('keydown', onKeydown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onKeydown)
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+})
+
 
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
@@ -41,6 +72,18 @@ const filtered = computed(() => {
       filter.value === 'Semua' || (th.category ?? []).includes(filter.value)
     return matchesSearch && matchesFilter
   })
+})
+
+const categoryList = computed(() => {
+  const set = new Set<string>()
+  thoughts.value.forEach((th) => (th.category ?? []).forEach((c: string) => {
+    if (c) set.add(c)
+  }))
+  return Array.from(set).sort().map((c) => ({
+    label: c,
+    value: c,
+    count: thoughts.value.filter((th) => (th.category ?? []).includes(c)).length,
+  }))
 })
 
 const categories = computed(() => {
@@ -106,22 +149,84 @@ const cover = (th: any) =>
           class="bg-transparent w-full outline-none body-md text-on-surface placeholder:text-on-surface-variant/50"
         />
       </div>
-      <div class="flex flex-wrap gap-3 items-center">
+      <!-- 2-Button Filter System (Admin Thoughts/Monolog) -->
+      <div class="flex items-center gap-3 shrink-0 flex-wrap">
+        <!-- Button 1: Semua (All) with kotak-kotak icon -->
         <button
-          class="neu-pressed rounded-full px-5 py-2.5 body-md text-primary font-bold transition-all duration-300"
-          @click="filter = 'Semua'"
+          type="button"
+          class="px-5 py-2.5 rounded-full body-md transition-all duration-300 flex items-center gap-2.5 cursor-pointer"
+          :class="filter === 'Semua'
+            ? 'neu-pressed text-primary font-bold shadow-inner'
+            : 'neu-raised text-on-surface-variant hover:text-on-surface hover:scale-105 active:scale-95'"
+          @click="filter = 'Semua'; dropdownOpen = false"
         >
-          Semua
+          <Icon name="ph:squares-four-bold" class="text-base" />
+          <span>Semua</span>
+          <span
+            class="neu-pressed px-2 py-0.5 rounded-full text-[11px] font-bold"
+            :class="filter === 'Semua' ? 'text-primary' : 'text-on-surface-variant'"
+          >
+            {{ thoughts.length }}
+          </span>
         </button>
-        <button
-          v-for="c in categories"
-          :key="c"
-          class="rounded-full px-5 py-2.5 body-md transition-all duration-300"
-          :class="filter === c ? 'neu-pressed text-primary font-bold' : 'neu-raised text-on-surface-variant hover:text-primary'"
-          @click="filter = c"
-        >
-          {{ c }}
-        </button>
+
+        <!-- Button 2: Option Dropdown Filter Tag -->
+        <div ref="dropdownRef" class="relative">
+          <button
+            type="button"
+            class="px-5 py-2.5 rounded-full body-md transition-all duration-300 flex items-center gap-2.5 cursor-pointer"
+            :class="filter !== 'Semua'
+              ? 'neu-pressed text-primary font-bold shadow-inner'
+              : 'neu-raised text-on-surface-variant hover:text-on-surface hover:scale-105 active:scale-95'"
+            @click="dropdownOpen = !dropdownOpen"
+          >
+            <Icon name="ph:funnel-bold" class="text-base" />
+            <span v-if="filter === 'Semua'">Filter Kategori</span>
+            <span v-else class="flex items-center gap-1.5 font-bold">
+              <span class="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span>{{ filter }}</span>
+            </span>
+            <Icon
+              name="ph:caret-down-bold"
+              class="text-xs transition-transform duration-300"
+              :class="dropdownOpen ? 'rotate-180' : ''"
+            />
+          </button>
+
+          <!-- Floating Dropdown Popover -->
+          <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0 translate-y-2 scale-95"
+            enter-to-class="opacity-100 translate-y-0 scale-100"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="opacity-100 translate-y-0 scale-100"
+            leave-to-class="opacity-0 translate-y-2 scale-95"
+          >
+            <div
+              v-if="dropdownOpen"
+              class="absolute right-0 md:left-0 mt-2 w-64 max-h-72 overflow-y-auto neu-island bg-surface-card rounded-2xl p-2 shadow-2xl border border-outline-variant/30 flex flex-col gap-1 z-50 backdrop-blur-xl"
+            >
+              <button
+                v-for="cat in categoryList"
+                :key="cat.value"
+                type="button"
+                class="w-full px-3.5 py-2 rounded-xl text-left body-sm flex items-center justify-between transition-all duration-200 cursor-pointer"
+                :class="filter === cat.value
+                  ? 'neu-pressed text-primary font-bold'
+                  : 'hover:neu-pressed text-on-surface-variant hover:text-on-surface'"
+                @click="filter = cat.value; dropdownOpen = false"
+              >
+                <span class="truncate">{{ cat.label }}</span>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="neu-pressed px-2 py-0.5 rounded-full text-[10px] font-bold text-on-surface-variant">
+                    {{ cat.count }}
+                  </span>
+                  <Icon v-if="filter === cat.value" name="ph:check-bold" class="text-xs text-primary" />
+                </div>
+              </button>
+            </div>
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -150,7 +255,10 @@ const cover = (th: any) =>
           </div>
           <div class="flex flex-col gap-1">
             <h3 class="title-md text-on-surface line-clamp-1">{{ titleOf(th) }}</h3>
-            <span class="body-md text-on-surface-variant">/{{ th.slug }}</span>
+            <NuxtLink :to="'/thoughts/' + th.slug" target="_blank" class="body-sm text-primary hover:underline flex items-center gap-1">
+              <span>/thoughts/{{ th.slug }}</span>
+              <Icon name="ph:arrow-square-out-bold" class="text-xs" />
+            </NuxtLink>
           </div>
           <div class="flex items-center gap-3 mt-auto">
             <span
@@ -166,20 +274,27 @@ const cover = (th: any) =>
             </span>
           </div>
         </div>
-        <div class="flex gap-3 pt-1 mt-auto">
+        <div class="flex gap-2 pt-1 mt-auto">
+          <NuxtLink
+            :to="'/thoughts/' + th.slug"
+            target="_blank"
+            class="flex-1 neu-raised py-2.5 rounded-full text-primary body-sm font-bold flex items-center justify-center gap-1.5 hover:neu-pressed transition-all duration-300"
+          >
+            <Icon name="ph:arrow-square-out-bold" class="text-base" />
+            <span>Lihat</span>
+          </NuxtLink>
           <button
-            class="flex-1 neu-raised py-2.5 rounded-full text-primary body-md font-bold flex items-center justify-center gap-2 hover:neu-pressed transition-all duration-300"
+            class="flex-1 neu-raised py-2.5 rounded-full text-primary body-sm font-bold flex items-center justify-center gap-1.5 hover:neu-pressed transition-all duration-300"
             @click="openEdit(th)"
           >
             <Icon name="ph:pencil-simple-bold" class="text-base" />
             {{ t('admin.edit') }}
           </button>
           <button
-            class="flex-1 neu-raised py-2.5 rounded-full text-error body-md font-bold flex items-center justify-center gap-2 hover:neu-pressed transition-all duration-300"
+            class="neu-raised w-10 h-10 rounded-full text-error body-sm font-bold flex items-center justify-center hover:neu-pressed transition-all duration-300 shrink-0"
             @click="removeThought(th)"
           >
             <Icon name="ph:trash-bold" class="text-base" />
-            {{ t('admin.delete') }}
           </button>
         </div>
       </div>

@@ -64,7 +64,7 @@ onUnmounted(() => {
 
 <template>
   <span
-    class="inline-block relative overflow-visible select-none text-center"
+    class="inline-block relative overflow-visible select-none text-left"
     aria-live="polite"
     aria-atomic="true"
   >

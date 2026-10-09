@@ -54,16 +54,14 @@ export default defineEventHandler(async (event) => {
     last_active_at: nowIso,
   }
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('visitor_analytics')
     .insert(row)
-    .select('id')
-    .single()
 
   if (error) {
     console.error('[analytics/track] Supabase insert error:', error.message)
     throw createError({ statusCode: 500, statusMessage: error.message })
   }
 
-  return { success: true, id: data?.id }
+  return { success: true }
 })

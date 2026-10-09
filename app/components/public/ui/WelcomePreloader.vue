@@ -28,6 +28,15 @@ const currentGreeting = computed(() => greetings[currentIndex.value] ?? greeting
 const progress = ref(0)
 const isExiting = ref(false)
 const isDestroyed = ref(false)
+const alreadySeen = ref(false)
+const { targetSection } = useScrollTo()
+
+if (import.meta.client) {
+  if (sessionStorage.getItem('portfolio_preloader_seen') === '1' || targetSection.value) {
+    alreadySeen.value = true
+    isDestroyed.value = true
+  }
+}
 
 let timer: ReturnType<typeof setInterval> | null = null
 let counterInterval: ReturnType<typeof setInterval> | null = null
@@ -43,6 +52,7 @@ const dismissPreloader = () => {
   // Unlock body scroll
   if (typeof document !== 'undefined') {
     document.body.style.overflow = ''
+    sessionStorage.setItem('portfolio_preloader_seen', '1')
   }
 
   setTimeout(() => {
@@ -51,6 +61,13 @@ const dismissPreloader = () => {
 }
 
 onMounted(() => {
+  if (alreadySeen.value) {
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = ''
+    }
+    return
+  }
+
   // Lock body scroll during preloader
   if (typeof document !== 'undefined') {
     document.body.style.overflow = 'hidden'
@@ -92,7 +109,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    v-if="!isDestroyed"
+    v-if="!isDestroyed && !alreadySeen"
     :class="[
       'fixed inset-0 z-[9999] isolate flex flex-col justify-between w-full h-full p-6 sm:p-10 select-none overflow-hidden overscroll-none touch-none bg-[#09111e] text-white transition-transform duration-700 ease-[cubic-bezier(0.76,0,0.24,1)]',
       isExiting ? '-translate-y-full pointer-events-none' : 'translate-y-0'

@@ -4,6 +4,7 @@ const { t, locale, setLocale } = useI18n()
 const { openChat } = useAiWidget()
 const { scrollTo } = useScrollTo()
 
+const route = useRoute()
 const mobileOpen = ref(false)
 const activeId = ref('home')
 let observer: IntersectionObserver | null = null
@@ -16,18 +17,24 @@ const links = computed<Link[]>(() => [
   { label: t('nav.contact'), id: 'contact' },
 ])
 
-const isActive = (l: Link) => activeId.value === l.id
+const isActive = (l: Link) => {
+  if (route.path.startsWith('/projects')) return l.id === 'projects'
+  if (route.path.startsWith('/thoughts')) return l.id === 'thoughts'
+  if (route.path !== '/') return false
+  return activeId.value === l.id
+}
 
 const go = (l: Link) => {
+  console.log('[Navbar] go clicked:', l.id)
   mobileOpen.value = false
   scrollTo(l.id)
 }
 
 const isScrolled = ref(false)
 
-onMounted(() => {
-  onScroll()
-  window.addEventListener('scroll', onScroll, { passive: true })
+const setupObserver = () => {
+  observer?.disconnect()
+  if (typeof window === 'undefined' || route.path !== '/') return
   observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -40,6 +47,20 @@ onMounted(() => {
     const el = document.getElementById(l.id)
     if (el) observer.observe(el)
   }
+}
+
+watch(() => route.path, (path) => {
+  if (path === '/') {
+    nextTick(() => {
+      setTimeout(setupObserver, 200)
+    })
+  }
+})
+
+onMounted(() => {
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+  setupObserver()
 })
 
 onBeforeUnmount(() => {
@@ -54,6 +75,31 @@ const onScroll = () => {
 const toggleLocale = () => {
   setLocale(locale.value === 'id' ? 'en' : 'id')
 }
+
+/**
+ * Konstanta Golden Ratio (Phi)
+ */
+const PHI = 1.618033988749895
+
+/**
+ * Menghitung ukuran font menu navbar secara dinamis berdasarkan status scroll.
+ * Konfigurasi: base 22px (unscrolled) dan menyusut ke 18px saat scrolled.
+ *
+ * @param scrolled Status apakah navbar menyempit/scrolled
+ * @param basePx Ukuran font awal (default 22px)
+ * @param scrolledPx Ukuran font saat navbar menyusut (default 18px)
+ * @returns Nilai string CSS px (misal: '22px' atau '18px')
+ */
+function computeNavbarFontSize(
+  scrolled: boolean,
+  basePx = 18,
+  scrolledPx = 14,
+): string {
+  if (!scrolled) return `${basePx}px`
+  return `${scrolledPx}px`
+}
+
+const navMenuFontSize = computed(() => computeNavbarFontSize(isScrolled.value, 18, 14))
 </script>
 
 <template>
@@ -63,7 +109,7 @@ const toggleLocale = () => {
   >
     <nav
       class="neu-raised rounded-full w-full flex items-center justify-between transition-all duration-300"
-      :class="isScrolled ? 'h-10 max-w-3xl md:max-w-4xl px-3 md:px-6 shadow-island' : 'h-16 max-w-7xl px-4 md:px-8'"
+      :class="isScrolled ? 'h-11 md:h-12 max-w-3xl md:max-w-4xl px-3 md:px-6 shadow-island' : 'h-16 max-w-7xl px-4 md:px-8'"
     >
       <button class="flex items-center gap-4" aria-label="Beranda" @click="go({ id: 'home', label: '' })">
         <span
@@ -74,12 +120,16 @@ const toggleLocale = () => {
         </span>
       </button>
 
-      <div class="hidden md:flex relative items-center gap-2">
+      <div class="hidden md:flex relative items-center gap-1.5 lg:gap-2">
         <button
           v-for="l in links"
           :key="l.id"
-          class="relative rounded-full transition-all duration-300 font-medium cursor-pointer"
-          :class="[isActive(l) ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface', isScrolled ? 'px-4 py-1' : 'px-6 py-2']"
+          class="relative rounded-full transition-all duration-300 font-medium cursor-pointer flex items-center justify-center leading-none"
+          :style="{ fontSize: navMenuFontSize }"
+          :class="[
+            isActive(l) ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface',
+            isScrolled ? 'px-3.5 py-1.5' : 'px-5 py-2'
+          ]"
           :aria-current="isActive(l) ? 'page' : undefined"
           @click="go(l)"
         >
@@ -95,8 +145,8 @@ const toggleLocale = () => {
         <a
           href="/Alfin-Almustajab-CV.pdf"
           download="Alfin Almustajab - CV.pdf"
-          class="neu-raised rounded-full flex items-center gap-1.5 font-medium hover:scale-105 active:scale-95 transition-transform"
-          :class="isScrolled ? 'px-3 py-1 text-sm' : 'px-4 py-2'"
+          class="neu-raised rounded-full flex items-center gap-1.5 font-medium hover:scale-105 active:scale-95 transition-all duration-300"
+          :class="isScrolled ? 'px-3 py-1 text-xs md:text-sm' : 'px-4 py-2 text-sm md:text-base'"
           :aria-label="t('nav.resume')"
           :title="t('nav.resume')"
         >

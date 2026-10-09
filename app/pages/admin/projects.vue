@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import { getTechIcon } from '~/utils/techIcons'
+
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
-const { listProjects, createProject, updateProject, deleteProject } = useAdmin()
+const { listProjects, createProject, updateProject, deleteProject, listStacks } = useAdmin()
 const { pick } = useLocale()
 
 const { t } = useI18n()
 
 const projects = ref<any[]>([])
+const stacks = ref<any[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const editing = ref<any | null>(null)
@@ -18,13 +21,30 @@ const fetchProjects = async () => {
   loading.value = true
   error.value = null
   try {
-    const { data } = await listProjects()
-    projects.value = data
+    const [{ data: pData }, { data: sData }] = await Promise.all([
+      listProjects(),
+      listStacks().catch(() => ({ data: [] })),
+    ])
+    projects.value = pData
+    stacks.value = sData || []
   } catch (e: any) {
     error.value = e?.response?.data?.statusMessage ?? e?.message ?? 'Gagal memuat proyek'
   } finally {
     loading.value = false
   }
+}
+
+const stackMap = computed(() => {
+  const map = new Map<string, any>()
+  for (const s of stacks.value) {
+    if (s?.name) map.set(s.name.toLowerCase().trim(), s)
+  }
+  return map
+})
+
+const getStackData = (techName: string) => {
+  if (!techName) return null
+  return stackMap.value.get(techName.toLowerCase().trim()) ?? null
 }
 
 const filtered = computed(() => {
@@ -38,6 +58,26 @@ const filtered = computed(() => {
       filter.value === 'Semua' || (p.category ?? []).includes(filter.value)
     return matchesSearch && matchesFilter
   })
+})
+
+// 2-Button Filter System State
+const dropdownOpen = ref(false)
+const dropdownRef = ref<HTMLElement | null>(null)
+
+onClickOutside(dropdownRef, () => {
+  dropdownOpen.value = false
+})
+
+const categoryList = computed(() => {
+  const set = new Set<string>()
+  projects.value.forEach((p) => (p.category ?? []).forEach((c: string) => {
+    if (c) set.add(c)
+  }))
+  return Array.from(set).sort().map((c) => ({
+    label: c,
+    value: c,
+    count: projects.value.filter((p) => (p.category ?? []).includes(c)).length,
+  }))
 })
 
 const categories = computed(() => {
@@ -99,7 +139,10 @@ const closeDetail = () => {
 }
 
 const onKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && detailOpen.value) closeDetail()
+  if (e.key === 'Escape') {
+    if (dropdownOpen.value) dropdownOpen.value = false
+    else if (detailOpen.value) closeDetail()
+  }
 }
 
 onMounted(() => {
@@ -149,22 +192,85 @@ const statusClass = (status?: string) => {
           class="bg-transparent w-full outline-none body-md text-on-surface placeholder:text-on-surface-variant/50"
         />
       </div>
-      <div class="flex flex-wrap gap-3 items-center">
+
+      <!-- 2-Button Filter System (Admin Portfolio) -->
+      <div class="flex items-center gap-3 shrink-0 flex-wrap">
+        <!-- Button 1: Semua (All) with kotak-kotak icon -->
         <button
-          class="neu-pressed rounded-full px-5 py-2.5 body-md text-primary font-bold transition-all duration-300"
-          @click="filter = 'Semua'"
+          type="button"
+          class="px-5 py-2.5 rounded-full body-md transition-all duration-300 flex items-center gap-2.5 cursor-pointer"
+          :class="filter === 'Semua'
+            ? 'neu-pressed text-primary font-bold shadow-inner'
+            : 'neu-raised text-on-surface-variant hover:text-on-surface hover:scale-105 active:scale-95'"
+          @click="filter = 'Semua'; dropdownOpen = false"
         >
-          Semua
+          <Icon name="ph:squares-four-bold" class="text-base" />
+          <span>Semua</span>
+          <span
+            class="neu-pressed px-2 py-0.5 rounded-full text-[11px] font-bold"
+            :class="filter === 'Semua' ? 'text-primary' : 'text-on-surface-variant'"
+          >
+            {{ projects.length }}
+          </span>
         </button>
-        <button
-          v-for="c in categories"
-          :key="c"
-          class="rounded-full px-5 py-2.5 body-md transition-all duration-300"
-          :class="filter === c ? 'neu-pressed text-primary font-bold' : 'neu-raised text-on-surface-variant hover:text-primary'"
-          @click="filter = c"
-        >
-          {{ c }}
-        </button>
+
+        <!-- Button 2: Option Dropdown Filter Tag -->
+        <div ref="dropdownRef" class="relative">
+          <button
+            type="button"
+            class="px-5 py-2.5 rounded-full body-md transition-all duration-300 flex items-center gap-2.5 cursor-pointer"
+            :class="filter !== 'Semua'
+              ? 'neu-pressed text-primary font-bold shadow-inner'
+              : 'neu-raised text-on-surface-variant hover:text-on-surface hover:scale-105 active:scale-95'"
+            @click="dropdownOpen = !dropdownOpen"
+          >
+            <Icon name="ph:funnel-bold" class="text-base" />
+            <span v-if="filter === 'Semua'">Filter Kategori</span>
+            <span v-else class="flex items-center gap-1.5 font-bold">
+              <span class="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span>{{ filter }}</span>
+            </span>
+            <Icon
+              name="ph:caret-down-bold"
+              class="text-xs transition-transform duration-300"
+              :class="dropdownOpen ? 'rotate-180' : ''"
+            />
+          </button>
+
+          <!-- Floating Dropdown Popover -->
+          <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0 translate-y-2 scale-95"
+            enter-to-class="opacity-100 translate-y-0 scale-100"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="opacity-100 translate-y-0 scale-100"
+            leave-to-class="opacity-0 translate-y-2 scale-95"
+          >
+            <div
+              v-if="dropdownOpen"
+              class="absolute right-0 md:left-0 mt-2 w-64 max-h-72 overflow-y-auto neu-island bg-surface-card rounded-2xl p-2 shadow-2xl border border-outline-variant/30 flex flex-col gap-1 z-50 backdrop-blur-xl"
+            >
+              <button
+                v-for="cat in categoryList"
+                :key="cat.value"
+                type="button"
+                class="w-full px-3.5 py-2 rounded-xl text-left body-sm flex items-center justify-between transition-all duration-200 cursor-pointer"
+                :class="filter === cat.value
+                  ? 'neu-pressed text-primary font-bold'
+                  : 'hover:neu-pressed text-on-surface-variant hover:text-on-surface'"
+                @click="filter = cat.value; dropdownOpen = false"
+              >
+                <span class="truncate">{{ cat.label }}</span>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="neu-pressed px-2 py-0.5 rounded-full text-[10px] font-bold text-on-surface-variant">
+                    {{ cat.count }}
+                  </span>
+                  <Icon v-if="filter === cat.value" name="ph:check-bold" class="text-xs text-primary" />
+                </div>
+              </button>
+            </div>
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -192,8 +298,14 @@ const statusClass = (status?: string) => {
           </div>
           <div class="flex flex-col gap-1">
             <h3 class="title-md text-on-surface line-clamp-1">{{ p.title }}</h3>
-            <span class="body-md text-primary font-bold">{{ p.year }}</span>
-            <span v-if="p.client" class="body-md text-on-surface-variant line-clamp-1">Klien: {{ p.client }}</span>
+            <div class="flex items-center gap-2">
+              <span class="body-sm text-primary font-bold">{{ p.year }}</span>
+              <span v-if="p.client" class="body-sm text-on-surface-variant line-clamp-1">• {{ p.client }}</span>
+            </div>
+            <NuxtLink :to="'/projects/' + p.slug" target="_blank" class="body-xs text-primary hover:underline flex items-center gap-1 font-mono">
+              <span>/projects/{{ p.slug }}</span>
+              <Icon name="ph:arrow-square-out-bold" class="text-xs" />
+            </NuxtLink>
           </div>
           <p class="body-md text-on-surface-variant line-clamp-2">
             {{ pick(p, 'summary') }}
@@ -212,27 +324,27 @@ const statusClass = (status?: string) => {
             </span>
           </div>
         </div>
-        <div class="flex gap-3 pt-1 mt-auto">
-          <button
-            class="flex-1 neu-raised py-2.5 rounded-full text-primary body-md font-bold flex items-center justify-center gap-2 hover:neu-pressed transition-all duration-300"
-            @click="openDetail(p)"
+        <div class="flex gap-2 pt-1 mt-auto">
+          <NuxtLink
+            :to="'/projects/' + p.slug"
+            target="_blank"
+            class="flex-1 neu-raised py-2.5 rounded-full text-primary body-sm font-bold flex items-center justify-center gap-1.5 hover:neu-pressed transition-all duration-300"
           >
-            <Icon name="ph:magnifying-glass-plus-bold" class="text-base" />
-            {{ t('admin.viewDetail') }}
-          </button>
+            <Icon name="ph:arrow-square-out-bold" class="text-base" />
+            <span>{{ t('admin.viewDetail') }}</span>
+          </NuxtLink>
           <button
-            class="flex-1 neu-raised py-2.5 rounded-full text-primary body-md font-bold flex items-center justify-center gap-2 hover:neu-pressed transition-all duration-300"
+            class="flex-1 neu-raised py-2.5 rounded-full text-primary body-sm font-bold flex items-center justify-center gap-1.5 hover:neu-pressed transition-all duration-300"
             @click="openEdit(p)"
           >
             <Icon name="ph:pencil-simple-bold" class="text-base" />
             {{ t('admin.edit') }}
           </button>
           <button
-            class="flex-1 neu-raised py-2.5 rounded-full text-error body-md font-bold flex items-center justify-center gap-2 hover:neu-pressed transition-all duration-300"
+            class="neu-raised w-10 h-10 rounded-full text-error body-sm font-bold flex items-center justify-center hover:neu-pressed transition-all duration-300 shrink-0"
             @click="removeProject(p)"
           >
             <Icon name="ph:trash-bold" class="text-base" />
-            {{ t('admin.delete') }}
           </button>
         </div>
       </div>
@@ -310,13 +422,20 @@ const statusClass = (status?: string) => {
                   </div>
                 </div>
 
-                <div class="w-full h-[360px] md:h-[560px] neu-raised rounded-card p-4 relative overflow-hidden group">
-                  <div class="w-full h-full rounded-[16px] overflow-hidden bg-surface-container flex items-center justify-center">
+                <div class="w-full aspect-[16/10] sm:aspect-video md:aspect-[16/9] max-h-[520px] neu-raised rounded-[18px] sm:rounded-card p-2 sm:p-4 relative overflow-hidden group">
+                  <div class="w-full h-full rounded-[14px] sm:rounded-[18px] overflow-hidden bg-surface-container relative flex items-center justify-center">
                     <img
                       v-if="detail.cover_image_url"
                       :src="detail.cover_image_url"
                       :alt="detail.title"
-                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      class="absolute inset-0 w-full h-full object-cover blur-2xl opacity-20 scale-110 pointer-events-none"
+                      aria-hidden="true"
+                    />
+                    <img
+                      v-if="detail.cover_image_url"
+                      :src="detail.cover_image_url"
+                      :alt="detail.title"
+                      class="relative z-10 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                     />
                     <span v-else class="text-7xl text-primary/15 font-extrabold select-none">{{ detail.title?.charAt(0) }}</span>
                   </div>
@@ -342,13 +461,30 @@ const statusClass = (status?: string) => {
                     </div>
                     <div class="flex flex-col gap-4">
                       <h2 class="title-md text-on-surface">{{ t('projectDetail.techStack') }}</h2>
-                      <div class="flex flex-wrap gap-4 mt-2">
+                      <div class="flex flex-wrap gap-3 mt-2">
                         <div
                           v-for="tech in (detail.tech_stack ?? [])"
                           :key="tech"
-                          class="neu-raised px-6 py-4 rounded-[16px] flex items-center gap-3"
+                          class="neu-raised px-4 py-3 rounded-[16px] flex items-center gap-3 hover:-translate-y-0.5 transition-transform"
                         >
-                          <Icon name="ph:code-bold" class="text-primary" />
+                          <div class="w-8 h-8 rounded-lg neu-pressed flex items-center justify-center p-1">
+                            <img
+                              v-if="getStackData(tech)?.icon_url"
+                              :src="getStackData(tech).icon_url"
+                              :alt="tech"
+                              class="w-5 h-5 object-contain"
+                              loading="lazy"
+                            />
+                            <GeminiIcon
+                              v-else-if="getStackData(tech)?.gemini"
+                              class="w-5 h-5 text-sky-500"
+                            />
+                            <Icon
+                              v-else
+                              :name="getTechIcon(tech)"
+                              class="text-lg text-primary"
+                            />
+                          </div>
                           <span class="body-md text-on-surface font-bold">{{ tech }}</span>
                         </div>
                       </div>
